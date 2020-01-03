@@ -1,4 +1,5 @@
-// Modified from:
+// Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html with copyright specified below:
+
 // Copyright 2016 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export class MakeWriteable {
+export class MakeWritable {
     constructor(public target: HTMLElement) {
         this.reset();
     }
@@ -98,5 +99,13 @@ export class MakeWriteable {
     }
 
 
+}
+
+export async function streamOrator(href: string, requestInit: RequestInit, target:HTMLElement){
+  const mw = new MakeWritable(target);
+  const response = await fetch(href, requestInit); 
+  await response.body
+      .pipeThrough(new TextDecoderStream())
+      .pipeTo((<any>target).writable);
 }
 
