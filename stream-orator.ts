@@ -14,8 +14,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+interface StreamOratorOptions{
+  filter?: (s: string) => string;
+}
+
 export class MakeWritable {
-    constructor(public target: HTMLElement) {
+    constructor(public target: HTMLElement, public options?: StreamOratorOptions) {
         this.reset();
     }
 
@@ -61,7 +65,7 @@ export class MakeWritable {
             });
             charactersWrittenInThisChunk = 0;
         }
-
+        const options = this.options;
         (<any>this.target).writable = new WritableStream({
             async write(chunk) {
               //console.log(chunk);
@@ -76,8 +80,9 @@ export class MakeWritable {
               while (cursor < chunk.length) {
                 const writeCharacters = Math.min(chunk.length - cursor,
                                                  charactersPerChunk - charactersWrittenInThisChunk);
-                  
-                iframe.contentDocument.write(chunk.substr(cursor, writeCharacters);
+                let newString = chunk.substr(cursor, writeCharacters);
+                if(options!== undefined && options.filter) newString = options.filter(newString);
+                iframe.contentDocument.write(newString);
                 cursor += writeCharacters;
                 charactersWrittenInThisChunk += writeCharacters;
                 if (charactersWrittenInThisChunk === charactersPerChunk) {
@@ -104,13 +109,13 @@ export class MakeWritable {
 
 }
 
-export async function streamOrator(href: string, requestInit: RequestInit, target:HTMLElement){
+export async function streamOrator(href: string, requestInit: RequestInit, target:HTMLElement, options?: StreamOratorOptions){
   const response = await fetch(href, requestInit); 
   if(typeof WritableStream === 'undefined'){
     const text = await response.text();
     target.innerHTML = text;
   }else{
-    const mw = new MakeWritable(target);
+    const mw = new MakeWritable(target, options);
     await response.body
     .pipeThrough(new TextDecoderStream())
     .pipeTo((<any>target).writable);

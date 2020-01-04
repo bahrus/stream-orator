@@ -11,7 +11,28 @@
     <div id=test></div>
     <script type=module>
         import {streamOrator} from '../stream-orator.js';
-        streamOrator('https://cors-anywhere.herokuapp.com/https://news.ycombinator.com/', {}, test);
+        class Processor{
+            filter(s){
+                if(!this._foundStart){
+                    const iPos = s.indexOf('<body');
+                    if(iPos === -1) return '';
+                    this._foundStart = true;
+                    return s.substr(iPos);
+                }
+                if(!this._foundEnd){
+                    const iPos = s.indexOf('</html>');
+                    if(iPos === -1) return s;
+                    this._foundEnd = true;
+                    return s.substr(0, s.length - 7);
+                }
+            }
+            constructor(filter){
+                this._foundStart = false;
+                this._foundEnd = false;
+            }
+        }
+        //streamOrator('https://cors-anywhere.herokuapp.com/https://news.ycombinator.com/', {}, test);
+        streamOrator('https://cors-anywhere.herokuapp.com/https://link.springer.com/article/10.1007/s00300-003-0563-3', {}, test, new Processor());
     </script>
 </body>
 </html>

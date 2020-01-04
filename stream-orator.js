@@ -1,20 +1,8 @@
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html with copyright specified below:
-// Copyright 2016 Google Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
 export class MakeWritable {
-    constructor(target) {
+    constructor(target, options) {
         this.target = target;
+        this.options = options;
         this.reset();
     }
     reset() {
@@ -54,6 +42,7 @@ export class MakeWritable {
             });
             charactersWrittenInThisChunk = 0;
         }
+        const options = this.options;
         this.target.writable = new WritableStream({
             async write(chunk) {
                 //console.log(chunk);
@@ -67,7 +56,10 @@ export class MakeWritable {
                 let cursor = 0;
                 while (cursor < chunk.length) {
                     const writeCharacters = Math.min(chunk.length - cursor, charactersPerChunk - charactersWrittenInThisChunk);
-                    iframe.contentDocument.write(chunk.substr(cursor, writeCharacters));
+                    let newString = chunk.substr(cursor, writeCharacters);
+                    if (options !== undefined && options.filter)
+                        newString = options.filter(newString);
+                    iframe.contentDocument.write(newString);
                     cursor += writeCharacters;
                     charactersWrittenInThisChunk += writeCharacters;
                     if (charactersWrittenInThisChunk === charactersPerChunk) {
@@ -90,14 +82,14 @@ export class MakeWritable {
         });
     }
 }
-export async function streamOrator(href, requestInit, target) {
+export async function streamOrator(href, requestInit, target, options) {
     const response = await fetch(href, requestInit);
     if (typeof WritableStream === 'undefined') {
         const text = await response.text();
         target.innerHTML = text;
     }
     else {
-        const mw = new MakeWritable(target);
+        const mw = new MakeWritable(target, options);
         await response.body
             .pipeThrough(new TextDecoderStream())
             .pipeTo(target.writable);
