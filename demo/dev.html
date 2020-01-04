@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <script type=module src="../stream-orator.js"></script>
+    <div id=test></div>
+    <script type=module>
+        import {streamOrator} from '../stream-orator.js';
+        streamOrator('https://cors-anywhere.herokuapp.com/https://news.ycombinator.com/', {}, test);
+    </script>
+</body>
+</html>

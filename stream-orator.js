@@ -25,15 +25,15 @@ export class MakeWritable {
             document.body.appendChild(iframe);
             iframe.onload = () => {
                 iframe.onload = null;
-                iframe.contentDocument.write('<streaming-element-inner>');
-                this.target.appendChild(iframe.contentDocument.querySelector('streaming-element-inner'));
+                iframe.contentDocument.write('<div>');
+                this.target.appendChild(iframe.contentDocument.querySelector('div'));
                 resolve(iframe);
             };
             iframe.src = '';
         });
         async function end() {
             let iframe = await iframeReady;
-            iframe.contentDocument.write('</streaming-element-inner>');
+            iframe.contentDocument.write('</div>');
             iframe.contentDocument.close();
             iframe.remove();
         }
@@ -56,6 +56,8 @@ export class MakeWritable {
         }
         this.target.writable = new WritableStream({
             async write(chunk) {
+                //console.log(chunk);
+                //console.log('write chunk');
                 if (idlePromise === undefined) {
                     startNewChunk();
                     await idlePromise;
@@ -78,7 +80,7 @@ export class MakeWritable {
                         }
                         const averageTimeElapsed = lastFewFrames.reduce((acc, val) => acc + val) / lastFewFrames.length;
                         charactersPerChunk = Math.max(256, Math.ceil(charactersPerChunk * MS_PER_FRAME / averageTimeElapsed));
-                        console.log(`timeElapsed = ${timeElapsed}, averageTimeElapsed = ${averageTimeElapsed}, charactersPerChunk = ${charactersPerChunk}`);
+                        //console.log(`timeElapsed = ${timeElapsed}, averageTimeElapsed = ${averageTimeElapsed}, charactersPerChunk = ${charactersPerChunk}`);
                         startNewChunk();
                     }
                 }
@@ -89,9 +91,15 @@ export class MakeWritable {
     }
 }
 export async function streamOrator(href, requestInit, target) {
-    const mw = new MakeWritable(target);
     const response = await fetch(href, requestInit);
-    await response.body
-        .pipeThrough(new TextDecoderStream())
-        .pipeTo(target.writable);
+    if (typeof WritableStream === 'undefined') {
+        const text = await response.text();
+        target.innerHTML = text;
+    }
+    else {
+        const mw = new MakeWritable(target);
+        await response.body
+            .pipeThrough(new TextDecoderStream())
+            .pipeTo(target.writable);
+    }
 }

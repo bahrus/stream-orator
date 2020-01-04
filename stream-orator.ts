@@ -29,8 +29,8 @@ export class MakeWritable {
 
             iframe.onload = () => {
                 iframe.onload = null;
-                iframe.contentDocument.write('<streaming-element-inner>');
-                this.target.appendChild(iframe.contentDocument.querySelector('streaming-element-inner'));
+                iframe.contentDocument.write('<div>');
+                this.target.appendChild(iframe.contentDocument.querySelector('div'));
                 resolve(iframe);
             };
             iframe.src = '';
@@ -38,7 +38,7 @@ export class MakeWritable {
 
         async function end() {
             let iframe = await iframeReady;
-            iframe.contentDocument.write('</streaming-element-inner>');
+            iframe.contentDocument.write('</div>');
             iframe.contentDocument.close();
             iframe.remove();
         }
@@ -64,6 +64,8 @@ export class MakeWritable {
 
         (<any>this.target).writable = new WritableStream({
             async write(chunk) {
+              //console.log(chunk);
+              //console.log('write chunk');
               if (idlePromise === undefined) {
                 startNewChunk();
                 await idlePromise;
@@ -74,7 +76,8 @@ export class MakeWritable {
               while (cursor < chunk.length) {
                 const writeCharacters = Math.min(chunk.length - cursor,
                                                  charactersPerChunk - charactersWrittenInThisChunk);
-                iframe.contentDocument.write(chunk.substr(cursor, writeCharacters));
+                  
+                iframe.contentDocument.write(chunk.substr(cursor, writeCharacters);
                 cursor += writeCharacters;
                 charactersWrittenInThisChunk += writeCharacters;
                 if (charactersWrittenInThisChunk === charactersPerChunk) {
@@ -87,7 +90,7 @@ export class MakeWritable {
                   }
                   const averageTimeElapsed = lastFewFrames.reduce((acc, val) => acc + val) / lastFewFrames.length;
                   charactersPerChunk = Math.max(256, Math.ceil(charactersPerChunk * MS_PER_FRAME / averageTimeElapsed));
-                  console.log(`timeElapsed = ${timeElapsed}, averageTimeElapsed = ${averageTimeElapsed}, charactersPerChunk = ${charactersPerChunk}`);
+                  //console.log(`timeElapsed = ${timeElapsed}, averageTimeElapsed = ${averageTimeElapsed}, charactersPerChunk = ${charactersPerChunk}`);
                   startNewChunk();
                 }
               }
@@ -102,10 +105,16 @@ export class MakeWritable {
 }
 
 export async function streamOrator(href: string, requestInit: RequestInit, target:HTMLElement){
-  const mw = new MakeWritable(target);
   const response = await fetch(href, requestInit); 
-  await response.body
-      .pipeThrough(new TextDecoderStream())
-      .pipeTo((<any>target).writable);
+  if(typeof WritableStream === 'undefined'){
+    const text = await response.text();
+    target.innerHTML = text;
+  }else{
+    const mw = new MakeWritable(target);
+    await response.body
+    .pipeThrough(new TextDecoderStream())
+    .pipeTo((<any>target).writable);
+  }
+
 }
 
