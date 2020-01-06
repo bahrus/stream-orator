@@ -1,3 +1,4 @@
+import {StreamOratorOptions} from './types.d.js';
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html with copyright specified below:
 
 // Copyright 2016 Google Inc.
@@ -14,9 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-interface StreamOratorOptions{
-  filter?: (s: string) => string;
-}
+
 
 export class MakeWritable {
     constructor(public target: HTMLElement, public options?: StreamOratorOptions) {
@@ -122,4 +121,57 @@ export async function streamOrator(href: string, requestInit: RequestInit, targe
   }
 
 }
+
+export class LHS_RHS_Processor implements StreamOratorOptions {
+  _foundStart = false;
+  _foundEnd = false; 
+       
+  filter(s){
+      if(!this._foundStart){
+          const iPos = s.indexOf(this.lhs);
+          if(iPos === -1) return '';
+          this._foundStart = true;
+          return s.substr(iPos);
+      }
+      else if(!this._foundEnd){
+          const iPos = s.indexOf(this.rhs);
+          if(iPos === -1) return s;
+          this._foundEnd = true;
+          return s.substr(0, iPos +  this.rhs.length);
+      }
+  }
+  constructor(public lhs: string, public rhs: string){}
+}
+
+export class TemplateProcessor implements StreamOratorOptions{
+  _lhs_rhs : LHS_RHS_Processor | undefined;
+  constructor(public template: HTMLTemplateElement){
+    const snipAtr = template.getAttribute('snip');
+    if(snipAtr !== null){
+      let lhs, rhs: string;
+      if(snipAtr.startsWith('{')){
+        const parsed = JSON.parse(snipAtr);
+        lhs = parsed.lhs;
+        rhs = parsed.rhs;
+      }else{
+        lhs = '<!---->';
+        rhs = '<!---->';
+      }
+      this._lhs_rhs = new LHS_RHS_Processor(lhs, rhs);
+    }
+  }
+  filter(s){
+    if(this._lhs_rhs !== undefined){
+      s = this._lhs_rhs.filter(s);
+    }
+    const detail = {
+      text: s,
+    }
+    this.template.dispatchEvent(new CustomEvent('stream-chunk', {
+      detail: detail
+    }))
+    return detail.text;
+  }
+}
+
 
