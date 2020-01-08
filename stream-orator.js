@@ -25,8 +25,9 @@ export class MakeWritable {
             iframe.style.display = 'none';
             document.body.appendChild(iframe);
             iframe.onload = () => {
+                var _a, _b, _c;
                 iframe.onload = null;
-                iframe.contentDocument.write('<div>');
+                iframe.contentDocument.write(`<${_b = (_a = this.options) === null || _a === void 0 ? void 0 : _a.streamContainerTag, (_b !== null && _b !== void 0 ? _b : 'div')} ${_c = this.options.streamContainerTagAttributes, (_c !== null && _c !== void 0 ? _c : '')}>`);
                 this.target.appendChild(iframe.contentDocument.querySelector('div'));
                 resolve(iframe);
             };

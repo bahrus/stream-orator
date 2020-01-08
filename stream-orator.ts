@@ -32,7 +32,7 @@ export class MakeWritable {
 
             iframe.onload = () => {
                 iframe.onload = null;
-                iframe.contentDocument.write('<div>');
+                iframe.contentDocument.write(`<${this.options?.streamContainerTag ?? 'div'} ${this.options.streamContainerTagAttributes ?? ''}>`);
                 this.target.appendChild(iframe.contentDocument.querySelector('div'));
                 resolve(iframe);
             };
