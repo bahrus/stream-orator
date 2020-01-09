@@ -167,9 +167,12 @@ export class TemplateProcessor implements StreamOratorOptions{
     const detail = {
       text: s,
     }
-    this.template.dispatchEvent(new CustomEvent('stream-chunk', {
-      detail: detail
-    }))
+    if(this.template.hasAttribute('enable-filter')){
+      this.template.dispatchEvent(new CustomEvent('stream-chunk', {
+        detail: detail
+      }))
+    }
+
     return detail.text;
   }
 }
