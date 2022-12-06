@@ -65,9 +65,11 @@ export class MakeWritable {
             charactersWrittenInThisChunk = 0;
         }
         const options = this.options;
+        console.log({options});
         (<any>this.target).writable = new WritableStream({
             async write(chunk) {
               //console.log(chunk);
+              console.log(chunk.length);
               //console.log('write chunk');
               if (idlePromise === undefined) {
                 startNewChunk();
@@ -80,7 +82,9 @@ export class MakeWritable {
                 const writeCharacters = Math.min(chunk.length - cursor,
                                                  charactersPerChunk - charactersWrittenInThisChunk);
                 let newString = chunk.substr(cursor, writeCharacters);
+                console.log({len: newString.length, newString, })
                 if(options!== undefined && options.filter) newString = options.filter(newString);
+                console.log({len: newString.length, newString});
                 iframe.contentDocument.write(newString);
                 cursor += writeCharacters;
                 charactersWrittenInThisChunk += writeCharacters;
@@ -127,6 +131,7 @@ export class LHS_RHS_Processor implements StreamOratorOptions {
   _foundEnd = false; 
        
   filter(s){
+      if(!this.lhs && !this.rhs) return s;
       if(!this._foundStart){
           const iPos = s.indexOf(this.lhs);
           if(iPos === -1) return '';

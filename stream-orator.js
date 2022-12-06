@@ -27,7 +27,7 @@ export class MakeWritable {
             iframe.onload = () => {
                 var _a, _b, _c;
                 iframe.onload = null;
-                iframe.contentDocument.write(`<${_b = (_a = this.options) === null || _a === void 0 ? void 0 : _a.streamContainerTag, (_b !== null && _b !== void 0 ? _b : 'div')} ${_c = this.options.streamContainerTagAttributes, (_c !== null && _c !== void 0 ? _c : '')}>`);
+                iframe.contentDocument.write(`<${(_b = (_a = this.options) === null || _a === void 0 ? void 0 : _a.streamContainerTag) !== null && _b !== void 0 ? _b : 'div'} ${(_c = this.options.streamContainerTagAttributes) !== null && _c !== void 0 ? _c : ''}>`);
                 this.target.appendChild(iframe.contentDocument.querySelector('div'));
                 resolve(iframe);
             };
@@ -57,9 +57,11 @@ export class MakeWritable {
             charactersWrittenInThisChunk = 0;
         }
         const options = this.options;
+        console.log({ options });
         this.target.writable = new WritableStream({
             async write(chunk) {
                 //console.log(chunk);
+                console.log(chunk.length);
                 //console.log('write chunk');
                 if (idlePromise === undefined) {
                     startNewChunk();
@@ -71,8 +73,10 @@ export class MakeWritable {
                 while (cursor < chunk.length) {
                     const writeCharacters = Math.min(chunk.length - cursor, charactersPerChunk - charactersWrittenInThisChunk);
                     let newString = chunk.substr(cursor, writeCharacters);
+                    console.log({ len: newString.length, newString, });
                     if (options !== undefined && options.filter)
                         newString = options.filter(newString);
+                    console.log({ len: newString.length, newString });
                     iframe.contentDocument.write(newString);
                     cursor += writeCharacters;
                     charactersWrittenInThisChunk += writeCharacters;
@@ -110,13 +114,9 @@ export async function streamOrator(href, requestInit, target, options) {
     }
 }
 export class LHS_RHS_Processor {
-    constructor(lhs, rhs) {
-        this.lhs = lhs;
-        this.rhs = rhs;
-        this._foundStart = false;
-        this._foundEnd = false;
-    }
     filter(s) {
+        if (!this.lhs && !this.rhs)
+            return s;
         if (!this._foundStart) {
             const iPos = s.indexOf(this.lhs);
             if (iPos === -1)
@@ -131,6 +131,12 @@ export class LHS_RHS_Processor {
             this._foundEnd = true;
             return s.substr(0, iPos + this.rhs.length);
         }
+    }
+    constructor(lhs, rhs) {
+        this.lhs = lhs;
+        this.rhs = rhs;
+        this._foundStart = false;
+        this._foundEnd = false;
     }
 }
 export class TemplateProcessor {
