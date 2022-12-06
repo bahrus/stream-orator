@@ -8,4 +8,4 @@ export interface NewChunkEvent {
     chunk: string;
 }
 
-export type StreamWriterEvents = 'new-chunk' | '';
+export type StreamOratorEvents = 'new-chunk' | '';

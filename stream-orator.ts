@@ -1,9 +1,9 @@
-import {Options, StreamWriterEvents} from './types';
+import {Options, StreamOratorEvents} from './types';
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
 
 export class StreamOrator extends EventTarget {
-    static emits : {[key in StreamWriterEvents]: StreamWriterEvents} = {
+    static emits : {[key in StreamOratorEvents]: StreamOratorEvents} = {
       "new-chunk": "new-chunk",
       ""
     }
