@@ -1,6 +1,12 @@
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
 export class StreamOrator extends EventTarget {
+    target;
+    options;
+    static emits = {
+        "new-chunk": "new-chunk",
+        "": 
+    };
     constructor(target, options) {
         super();
         this.target = target;
@@ -68,10 +74,6 @@ export class StreamOrator extends EventTarget {
         });
     }
 }
-StreamOrator.emits = {
-    "new-chunk": "new-chunk",
-    "": 
-};
 export async function streamOrator(href, requestInit, target, options) {
     const response = await fetch(href, requestInit);
     if (typeof WritableStream === 'undefined') {
