@@ -4,4 +4,14 @@ This package contains a utility function, streamOrator, that does a fetch and pi
 
 Example:
 
-
+```html
+    <script type=module src="node_modules/stream-orator/stream-orator.js"></script>
+    <details>
+        <summary>HTML Specs</summary>
+        <div id=test></div>
+    </details>
+    <script type=module>
+        import {streamOrator} from '../stream-orator.js';
+        streamOrator('https://html.spec.whatwg.org/', {}, test);
+    </script>
+```
