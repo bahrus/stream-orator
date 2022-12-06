@@ -35,3 +35,24 @@ There is an additional optional "options" parameter, where we can utilize shadow
     streamOrator('https://html.spec.whatwg.org/', {}, test, {toShadow: true});
 </script>
 ```
+
+## Access to the stream
+
+If access to the stream chunks is needed, including modifying the chunks, a little more ceremony is needed:
+
+```html
+<details>
+    <summary>HTML Specs</summary>
+    <div id=test></div>
+</details>
+<script type=module>
+    import {streamOrator, StreamWriter} from '../stream-orator.js';
+    const sw =  new StreamWriter(target, {toShadow: true});
+    sw.addEventListener('new-chunk', e => {
+        const chunk = e.detail.chunk;
+        //search for a string.  If the first part of the string you are searching for is found at the end of the chunk, may need to ask the writer to wait before flushing to the stream
+        e.detail.flush = false;
+    });
+    sw.fetch('https://html.spec.whatwg.org/', {});
+</script>
+```
