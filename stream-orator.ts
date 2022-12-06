@@ -9,7 +9,8 @@ export class MakeWritable {
     }
 
     reset() {
-        this.target.innerHTML = '';
+        const {target} = this; 
+        target.innerHTML = '';
 
 
         let idlePromise;
@@ -31,6 +32,7 @@ export class MakeWritable {
             charactersWrittenInThisChunk = 0;
         }
         const options = this.options;
+        
         (<any>this.target).writable = new WritableStream({
             async write(chunk) {
               if (idlePromise === undefined) {
@@ -40,7 +42,7 @@ export class MakeWritable {
               }
               const doc = document.implementation.createHTMLDocument();
               doc.write('<div>');
-              document.body.append(doc.body.firstChild);
+              target.append(doc.body.firstChild);
               let cursor = 0;
               while (cursor < chunk.length) {
                 const writeCharacters = Math.min(chunk.length - cursor,

@@ -7,7 +7,8 @@ export class MakeWritable {
         this.reset();
     }
     reset() {
-        this.target.innerHTML = '';
+        const { target } = this;
+        target.innerHTML = '';
         let idlePromise;
         let charactersWrittenInThisChunk = 0;
         // Sometimes the browser will decide to target 30fps and nothing we do will
@@ -35,7 +36,7 @@ export class MakeWritable {
                 }
                 const doc = document.implementation.createHTMLDocument();
                 doc.write('<div>');
-                document.body.append(doc.body.firstChild);
+                target.append(doc.body.firstChild);
                 let cursor = 0;
                 while (cursor < chunk.length) {
                     const writeCharacters = Math.min(chunk.length - cursor, charactersPerChunk - charactersWrittenInThisChunk);
