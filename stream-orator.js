@@ -1,5 +1,5 @@
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
-// with inspiration from
+// with inspiration from https://jsbin.com/kaposeh/edit?js,output
 export class MakeWritable {
     constructor(target, options) {
         this.target = target;
@@ -8,25 +8,24 @@ export class MakeWritable {
     }
     reset() {
         this.target.innerHTML = '';
-        const iframeReady = new Promise(resolve => {
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
-            iframe.onload = () => {
-                var _a, _b, _c;
-                iframe.onload = null;
-                iframe.contentDocument.write(`<${(_b = (_a = this.options) === null || _a === void 0 ? void 0 : _a.streamContainerTag) !== null && _b !== void 0 ? _b : 'div'} ${(_c = this.options.streamContainerTagAttributes) !== null && _c !== void 0 ? _c : ''}>`);
-                this.target.appendChild(iframe.contentDocument.querySelector('div'));
-                resolve(iframe);
-            };
-            iframe.src = '';
-        });
-        async function end() {
-            let iframe = await iframeReady;
-            iframe.contentDocument.write('</div>');
-            iframe.contentDocument.close();
-            iframe.remove();
-        }
+        // const iframeReady = new Promise<HTMLIFrameElement>(resolve => {
+        //     const iframe = document.createElement('iframe') as HTMLIFrameElement;
+        //     iframe.style.display = 'none';
+        //     document.body.appendChild(iframe);
+        //     iframe.onload = () => {
+        //         iframe.onload = null;
+        //         iframe.contentDocument.write(`<${this.options?.streamContainerTag ?? 'div'} ${this.options.streamContainerTagAttributes ?? ''}>`);
+        //         this.target.appendChild(iframe.contentDocument.querySelector('div'));
+        //         resolve(iframe);
+        //     };
+        //     iframe.src = '';
+        // });
+        // async function end() {
+        //     let iframe = await iframeReady;
+        //     iframe.contentDocument.write('</div>');
+        //     iframe.contentDocument.close();
+        //     iframe.remove();
+        // }
         let idlePromise;
         let charactersWrittenInThisChunk = 0;
         // Sometimes the browser will decide to target 30fps and nothing we do will
@@ -56,7 +55,10 @@ export class MakeWritable {
                     await idlePromise;
                     startNewChunk();
                 }
-                let iframe = await iframeReady;
+                //let iframe = await iframeReady;
+                const doc = document.implementation.createHTMLDocument();
+                doc.write('<div>');
+                document.body.append(doc.body.firstChild);
                 let cursor = 0;
                 while (cursor < chunk.length) {
                     const writeCharacters = Math.min(chunk.length - cursor, charactersPerChunk - charactersWrittenInThisChunk);
@@ -65,7 +67,8 @@ export class MakeWritable {
                     if (options !== undefined && options.filter)
                         newString = options.filter(newString);
                     //console.log({len: newString.length, newString});
-                    iframe.contentDocument.write(newString);
+                    //iframe.contentDocument.write(newString);
+                    doc.write(newString);
                     cursor += writeCharacters;
                     charactersWrittenInThisChunk += writeCharacters;
                     if (charactersWrittenInThisChunk === charactersPerChunk) {
@@ -83,8 +86,8 @@ export class MakeWritable {
                     }
                 }
             },
-            close: end,
-            abort: end
+            //close: end,
+            //abort: end
         });
     }
 }

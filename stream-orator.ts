@@ -1,6 +1,6 @@
 import {StreamOratorOptions} from './types.d.js';
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
-// with inspiration from
+// with inspiration from https://jsbin.com/kaposeh/edit?js,output
 
 
 export class MakeWritable {
@@ -11,26 +11,26 @@ export class MakeWritable {
     reset() {
         this.target.innerHTML = '';
 
-        const iframeReady = new Promise<HTMLIFrameElement>(resolve => {
-            const iframe = document.createElement('iframe') as HTMLIFrameElement;
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
+        // const iframeReady = new Promise<HTMLIFrameElement>(resolve => {
+        //     const iframe = document.createElement('iframe') as HTMLIFrameElement;
+        //     iframe.style.display = 'none';
+        //     document.body.appendChild(iframe);
 
-            iframe.onload = () => {
-                iframe.onload = null;
-                iframe.contentDocument.write(`<${this.options?.streamContainerTag ?? 'div'} ${this.options.streamContainerTagAttributes ?? ''}>`);
-                this.target.appendChild(iframe.contentDocument.querySelector('div'));
-                resolve(iframe);
-            };
-            iframe.src = '';
-        });
+        //     iframe.onload = () => {
+        //         iframe.onload = null;
+        //         iframe.contentDocument.write(`<${this.options?.streamContainerTag ?? 'div'} ${this.options.streamContainerTagAttributes ?? ''}>`);
+        //         this.target.appendChild(iframe.contentDocument.querySelector('div'));
+        //         resolve(iframe);
+        //     };
+        //     iframe.src = '';
+        // });
 
-        async function end() {
-            let iframe = await iframeReady;
-            iframe.contentDocument.write('</div>');
-            iframe.contentDocument.close();
-            iframe.remove();
-        }
+        // async function end() {
+        //     let iframe = await iframeReady;
+        //     iframe.contentDocument.write('</div>');
+        //     iframe.contentDocument.close();
+        //     iframe.remove();
+        // }
 
         let idlePromise;
         let charactersWrittenInThisChunk = 0;
@@ -62,7 +62,10 @@ export class MakeWritable {
                 await idlePromise;
                 startNewChunk();
               }
-              let iframe = await iframeReady;
+              //let iframe = await iframeReady;
+              const doc = document.implementation.createHTMLDocument();
+              doc.write('<div>');
+              document.body.append(doc.body.firstChild);
               let cursor = 0;
               while (cursor < chunk.length) {
                 const writeCharacters = Math.min(chunk.length - cursor,
@@ -71,7 +74,8 @@ export class MakeWritable {
                 //console.log({len: newString.length, newString, })
                 if(options!== undefined && options.filter) newString = options.filter(newString);
                 //console.log({len: newString.length, newString});
-                iframe.contentDocument.write(newString);
+                //iframe.contentDocument.write(newString);
+                doc.write(newString);
                 cursor += writeCharacters;
                 charactersWrittenInThisChunk += writeCharacters;
                 if (charactersWrittenInThisChunk === charactersPerChunk) {
@@ -89,8 +93,8 @@ export class MakeWritable {
                 }
               }
             },
-            close: end,
-            abort: end
+            //close: end,
+            //abort: end
           });
 
     }
