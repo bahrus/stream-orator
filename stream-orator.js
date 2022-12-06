@@ -1,13 +1,21 @@
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
 export class MakeWritable {
-    constructor(target) {
+    constructor(target, options) {
         this.target = target;
+        this.options = options;
         this.reset();
     }
     reset() {
-        const { target } = this;
-        target.innerHTML = '';
+        const { target, options } = this;
+        const { toShadow } = options;
+        let realTarget = target;
+        if (toShadow) {
+            if (target.shadowRoot === null)
+                target.attachShadow({ mode: 'open' });
+            realTarget = target.shadowRoot;
+        }
+        realTarget.innerHTML = '';
         let idlePromise;
         let charactersWrittenInThisChunk = 0;
         // Sometimes the browser will decide to target 30fps and nothing we do will
@@ -34,7 +42,7 @@ export class MakeWritable {
                 }
                 const doc = document.implementation.createHTMLDocument();
                 doc.write('<div>');
-                target.append(doc.body.firstChild);
+                realTarget.append(doc.body.firstChild);
                 let cursor = 0;
                 while (cursor < chunk.length) {
                     const writeCharacters = Math.min(chunk.length - cursor, charactersPerChunk - charactersWrittenInThisChunk);
@@ -59,14 +67,17 @@ export class MakeWritable {
         });
     }
 }
-export async function streamOrator(href, requestInit, target) {
+export async function streamOrator(href, requestInit, target, options) {
     const response = await fetch(href, requestInit);
     if (typeof WritableStream === 'undefined') {
         const text = await response.text();
         target.innerHTML = text;
     }
     else {
-        const mw = new MakeWritable(target);
+        const writeOptions = options || {
+            toShadow: false,
+        };
+        const mw = new MakeWritable(target, writeOptions);
         await response.body
             .pipeThrough(new TextDecoderStream())
             .pipeTo(target.writable);

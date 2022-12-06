@@ -22,3 +22,16 @@ Example:
 The second parameter is the reqInit object (fetch options).
 
 So basically, streamOrator is the fetch function, with a third parameter that specifies the target.
+
+There is an additional optional "options" parameter, where we can utilize shadowDOM:
+
+```html
+<details>
+    <summary>HTML Specs</summary>
+    <div id=test></div>
+</details>
+<script type=module>
+    import {streamOrator} from '../stream-orator.js';
+    streamOrator('https://html.spec.whatwg.org/', {}, test, {toShadow: true});
+</script>
+```
