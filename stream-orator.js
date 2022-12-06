@@ -1,9 +1,8 @@
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
 export class MakeWritable {
-    constructor(target, options) {
+    constructor(target) {
         this.target = target;
-        this.options = options;
         this.reset();
     }
     reset() {
@@ -26,7 +25,6 @@ export class MakeWritable {
             });
             charactersWrittenInThisChunk = 0;
         }
-        const options = this.options;
         this.target.writable = new WritableStream({
             async write(chunk) {
                 if (idlePromise === undefined) {
@@ -41,8 +39,6 @@ export class MakeWritable {
                 while (cursor < chunk.length) {
                     const writeCharacters = Math.min(chunk.length - cursor, charactersPerChunk - charactersWrittenInThisChunk);
                     let newString = chunk.substr(cursor, writeCharacters);
-                    if (options !== undefined && options.filter)
-                        newString = options.filter(newString);
                     doc.write(newString);
                     cursor += writeCharacters;
                     charactersWrittenInThisChunk += writeCharacters;
@@ -63,75 +59,16 @@ export class MakeWritable {
         });
     }
 }
-export async function streamOrator(href, requestInit, target, options) {
+export async function streamOrator(href, requestInit, target) {
     const response = await fetch(href, requestInit);
     if (typeof WritableStream === 'undefined') {
         const text = await response.text();
         target.innerHTML = text;
     }
     else {
-        const mw = new MakeWritable(target, options);
+        const mw = new MakeWritable(target);
         await response.body
             .pipeThrough(new TextDecoderStream())
             .pipeTo(target.writable);
-    }
-}
-export class LHS_RHS_Processor {
-    filter(s) {
-        if (!this.lhs && !this.rhs)
-            return s;
-        if (!this._foundStart) {
-            const iPos = s.indexOf(this.lhs);
-            if (iPos === -1)
-                return '';
-            this._foundStart = true;
-            return s.substr(iPos);
-        }
-        else if (!this._foundEnd) {
-            const iPos = s.indexOf(this.rhs);
-            if (iPos === -1)
-                return s;
-            this._foundEnd = true;
-            return s.substr(0, iPos + this.rhs.length);
-        }
-    }
-    constructor(lhs, rhs) {
-        this.lhs = lhs;
-        this.rhs = rhs;
-        this._foundStart = false;
-        this._foundEnd = false;
-    }
-}
-export class TemplateProcessor {
-    constructor(template) {
-        this.template = template;
-        const snipAtr = template.getAttribute('snip');
-        if (snipAtr !== null) {
-            let lhs, rhs;
-            if (snipAtr.startsWith('{')) {
-                const parsed = JSON.parse(snipAtr);
-                lhs = parsed.lhs;
-                rhs = parsed.rhs;
-            }
-            else {
-                lhs = '<!---->';
-                rhs = '<!---->';
-            }
-            this._lhs_rhs = new LHS_RHS_Processor(lhs, rhs);
-        }
-    }
-    filter(s) {
-        if (this._lhs_rhs !== undefined) {
-            s = this._lhs_rhs.filter(s);
-        }
-        const detail = {
-            text: s,
-        };
-        if (this.template.hasAttribute('enable-filter')) {
-            this.template.dispatchEvent(new CustomEvent('stream-chunk', {
-                detail: detail
-            }));
-        }
-        return detail.text;
     }
 }

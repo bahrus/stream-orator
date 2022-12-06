@@ -1,10 +1,9 @@
-import {StreamOratorOptions} from './types.d.js';
+
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
 
-
 export class MakeWritable {
-    constructor(public target: HTMLElement, public options?: StreamOratorOptions) {
+    constructor(public target: HTMLElement) {
         this.reset();
     }
 
@@ -31,7 +30,6 @@ export class MakeWritable {
             });
             charactersWrittenInThisChunk = 0;
         }
-        const options = this.options;
         
         (<any>this.target).writable = new WritableStream({
             async write(chunk) {
@@ -48,7 +46,6 @@ export class MakeWritable {
                 const writeCharacters = Math.min(chunk.length - cursor,
                                                  charactersPerChunk - charactersWrittenInThisChunk);
                 let newString = chunk.substr(cursor, writeCharacters);
-                if(options!== undefined && options.filter) newString = options.filter(newString);
                 doc.write(newString);
                 cursor += writeCharacters;
                 charactersWrittenInThisChunk += writeCharacters;
@@ -73,13 +70,13 @@ export class MakeWritable {
 
 }
 
-export async function streamOrator(href: string, requestInit: RequestInit, target:HTMLElement, options?: StreamOratorOptions){
+export async function streamOrator(href: string, requestInit: RequestInit, target:HTMLElement){
   const response = await fetch(href, requestInit); 
   if(typeof WritableStream === 'undefined'){
     const text = await response.text();
     target.innerHTML = text;
   }else{
-    const mw = new MakeWritable(target, options);
+    const mw = new MakeWritable(target);
     await response.body
     .pipeThrough(new TextDecoderStream())
     .pipeTo((<any>target).writable);
@@ -87,60 +84,8 @@ export async function streamOrator(href: string, requestInit: RequestInit, targe
 
 }
 
-export class LHS_RHS_Processor implements StreamOratorOptions {
-  _foundStart = false;
-  _foundEnd = false; 
-       
-  filter(s){
-      if(!this.lhs && !this.rhs) return s;
-      if(!this._foundStart){
-          const iPos = s.indexOf(this.lhs);
-          if(iPos === -1) return '';
-          this._foundStart = true;
-          return s.substr(iPos);
-      }
-      else if(!this._foundEnd){
-          const iPos = s.indexOf(this.rhs);
-          if(iPos === -1) return s;
-          this._foundEnd = true;
-          return s.substr(0, iPos +  this.rhs.length);
-      }
-  }
-  constructor(public lhs: string, public rhs: string){}
-}
 
-export class TemplateProcessor implements StreamOratorOptions{
-  _lhs_rhs : LHS_RHS_Processor | undefined;
-  constructor(public template: HTMLTemplateElement){
-    const snipAtr = template.getAttribute('snip');
-    if(snipAtr !== null){
-      let lhs, rhs: string;
-      if(snipAtr.startsWith('{')){
-        const parsed = JSON.parse(snipAtr);
-        lhs = parsed.lhs;
-        rhs = parsed.rhs;
-      }else{
-        lhs = '<!---->';
-        rhs = '<!---->';
-      }
-      this._lhs_rhs = new LHS_RHS_Processor(lhs, rhs);
-    }
-  }
-  filter(s){
-    if(this._lhs_rhs !== undefined){
-      s = this._lhs_rhs.filter(s);
-    }
-    const detail = {
-      text: s,
-    }
-    if(this.template.hasAttribute('enable-filter')){
-      this.template.dispatchEvent(new CustomEvent('stream-chunk', {
-        detail: detail
-      }))
-    }
 
-    return detail.text;
-  }
-}
+
 
 
