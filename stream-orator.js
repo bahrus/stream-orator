@@ -1,17 +1,5 @@
-// Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html with copyright specified below:
-// Copyright 2016 Google Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
+// with inspiration from
 export class MakeWritable {
     constructor(target, options) {
         this.target = target;
@@ -57,11 +45,11 @@ export class MakeWritable {
             charactersWrittenInThisChunk = 0;
         }
         const options = this.options;
-        console.log({ options });
+        //console.log({options});
         this.target.writable = new WritableStream({
             async write(chunk) {
                 //console.log(chunk);
-                console.log(chunk.length);
+                //console.log(chunk.length);
                 //console.log('write chunk');
                 if (idlePromise === undefined) {
                     startNewChunk();
@@ -73,10 +61,10 @@ export class MakeWritable {
                 while (cursor < chunk.length) {
                     const writeCharacters = Math.min(chunk.length - cursor, charactersPerChunk - charactersWrittenInThisChunk);
                     let newString = chunk.substr(cursor, writeCharacters);
-                    console.log({ len: newString.length, newString, });
+                    //console.log({len: newString.length, newString, })
                     if (options !== undefined && options.filter)
                         newString = options.filter(newString);
-                    console.log({ len: newString.length, newString });
+                    //console.log({len: newString.length, newString});
                     iframe.contentDocument.write(newString);
                     cursor += writeCharacters;
                     charactersWrittenInThisChunk += writeCharacters;
