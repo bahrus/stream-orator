@@ -8,11 +8,12 @@
 </head>
 <body>
     <script type=module src="../stream-orator.js"></script>
-    <template id=test></template>
+    <!-- <template id=test></template> -->
+    <div id=test></div>
     <script type=module>
         import {streamOrator} from '../stream-orator.js';
-        import {LHS_RHS_Processor} from '../LHS_RHS_Processor.js';
-        streamOrator('https://cors-anywhere.herokuapp.com/https://link.springer.com/article/10.1007/s00300-003-0563-3', {}, test, new LHS_RHS_Processor('<body', '</body>'));
+        import {LHS_RHS_Processor} from '../stream-orator.js';
+        streamOrator('https://corslet.bahrus.workers.dev/?href=https%3A%2F%2Fwww.supremecourt.gov%2Fabout%2Fmembers_text.aspx&lhs=%3Cdiv+id%3D%22pagemaindiv%22+class%3D%22col-md-9%22%3E&rhs=script&exclude_rhs=on&ts=2022-12-06T00%3A26%3A47.783Z&wrapper=%3Cdiv%3E%7C%3C%2Fdiv%3E&ua=', {}, test, new LHS_RHS_Processor('', ''));
     </script>
 </body>
 </html>

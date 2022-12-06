@@ -7,10 +7,10 @@
   "types": "types.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "node node_modules/xtal-test/serve.js"
+    "serve": "node node_modules/may-it-serve/serve.js"
   },
   "devDependencies": {
-    "xtal-test": "0.0.31"
+    "may-it-serve": "0.0.4"
   },
   "repository": {
     "type": "git",
