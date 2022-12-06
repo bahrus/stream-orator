@@ -15,3 +15,5 @@ Example:
         streamOrator('https://html.spec.whatwg.org/', {}, test);
     </script>
 ```
+
+The second parameter is the reqInit object.
