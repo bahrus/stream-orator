@@ -11,26 +11,6 @@ export class MakeWritable {
     reset() {
         this.target.innerHTML = '';
 
-        // const iframeReady = new Promise<HTMLIFrameElement>(resolve => {
-        //     const iframe = document.createElement('iframe') as HTMLIFrameElement;
-        //     iframe.style.display = 'none';
-        //     document.body.appendChild(iframe);
-
-        //     iframe.onload = () => {
-        //         iframe.onload = null;
-        //         iframe.contentDocument.write(`<${this.options?.streamContainerTag ?? 'div'} ${this.options.streamContainerTagAttributes ?? ''}>`);
-        //         this.target.appendChild(iframe.contentDocument.querySelector('div'));
-        //         resolve(iframe);
-        //     };
-        //     iframe.src = '';
-        // });
-
-        // async function end() {
-        //     let iframe = await iframeReady;
-        //     iframe.contentDocument.write('</div>');
-        //     iframe.contentDocument.close();
-        //     iframe.remove();
-        // }
 
         let idlePromise;
         let charactersWrittenInThisChunk = 0;
@@ -51,18 +31,13 @@ export class MakeWritable {
             charactersWrittenInThisChunk = 0;
         }
         const options = this.options;
-        //console.log({options});
         (<any>this.target).writable = new WritableStream({
             async write(chunk) {
-              //console.log(chunk);
-              //console.log(chunk.length);
-              //console.log('write chunk');
               if (idlePromise === undefined) {
                 startNewChunk();
                 await idlePromise;
                 startNewChunk();
               }
-              //let iframe = await iframeReady;
               const doc = document.implementation.createHTMLDocument();
               doc.write('<div>');
               document.body.append(doc.body.firstChild);
@@ -71,10 +46,7 @@ export class MakeWritable {
                 const writeCharacters = Math.min(chunk.length - cursor,
                                                  charactersPerChunk - charactersWrittenInThisChunk);
                 let newString = chunk.substr(cursor, writeCharacters);
-                //console.log({len: newString.length, newString, })
                 if(options!== undefined && options.filter) newString = options.filter(newString);
-                //console.log({len: newString.length, newString});
-                //iframe.contentDocument.write(newString);
                 doc.write(newString);
                 cursor += writeCharacters;
                 charactersWrittenInThisChunk += writeCharacters;
@@ -88,13 +60,10 @@ export class MakeWritable {
                   }
                   const averageTimeElapsed = lastFewFrames.reduce((acc, val) => acc + val) / lastFewFrames.length;
                   charactersPerChunk = Math.max(256, Math.ceil(charactersPerChunk * MS_PER_FRAME / averageTimeElapsed));
-                  //console.log(`timeElapsed = ${timeElapsed}, averageTimeElapsed = ${averageTimeElapsed}, charactersPerChunk = ${charactersPerChunk}`);
                   startNewChunk();
                 }
               }
             },
-            //close: end,
-            //abort: end
           });
 
     }
