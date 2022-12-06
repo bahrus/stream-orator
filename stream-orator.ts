@@ -1,19 +1,23 @@
-import {Options} from './types';
+import {Options, MakeWritableEvents} from './types';
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
 
-export class MakeWritable {
+export class MakeWritable extends EventTarget {
+    static emits : {[key in MakeWritableEvents]: MakeWritableEvents} = {
+      "new-chunk": "new-chunk"
+    }
     constructor(public target: HTMLElement, public options: Options) {
+        super();
         this.reset();
     }
 
     reset() {
         const {target, options} = this; 
         const {toShadow} = options;
-        let realTarget = target as any as InnerHTML & DocumentOrShadowRoot & Element;
+        let realTarget = target as Element;
         if(toShadow){
           if(target.shadowRoot === null) target.attachShadow({mode: 'open'});
-          realTarget = target.shadowRoot;
+          realTarget = target.shadowRoot as any as Element;
         }
         realTarget.innerHTML = '';
 

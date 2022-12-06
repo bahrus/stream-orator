@@ -1,7 +1,8 @@
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
-export class MakeWritable {
+export class MakeWritable extends EventTarget {
     constructor(target, options) {
+        super();
         this.target = target;
         this.options = options;
         this.reset();
@@ -67,6 +68,9 @@ export class MakeWritable {
         });
     }
 }
+MakeWritable.emits = {
+    "new-chunk": "new-chunk"
+};
 export async function streamOrator(href, requestInit, target, options) {
     const response = await fetch(href, requestInit);
     if (typeof WritableStream === 'undefined') {
