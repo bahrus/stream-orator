@@ -3,4 +3,9 @@ export interface Options {
     noStreaming: boolean;
 }
 
+export interface NewChunkEvent {
+    flush: boolean;
+    chunk: string;
+}
+
 export type MakeWritableEvents = 'new-chunk';
