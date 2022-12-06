@@ -16,4 +16,6 @@ Example:
     </script>
 ```
 
-The second parameter is the reqInit object.
+The second parameter is the reqInit object (fetch options).
+
+So basically, streamOrator is the fetch function, with a third parameter that specifies the target.
