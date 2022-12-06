@@ -46,13 +46,13 @@ If access to the stream chunks is needed, including modifying the chunks, a litt
     <div id=test></div>
 </details>
 <script type=module>
-    import {streamOrator, StreamWriter} from '../stream-orator.js';
-    const sw =  new StreamWriter(target, {toShadow: true});
-    sw.addEventListener('new-chunk', e => {
+    import {StreamOrator} from '../stream-orator.js';
+    const so =  new StreamOrator(target, {toShadow: true});
+    so.addEventListener('new-chunk', e => {
         const chunk = e.detail.chunk;
         //search for a string.  If the first part of the string you are searching for is found at the end of the chunk, may need to ask the writer to wait before flushing to the stream
         e.detail.flush = false;
     });
-    await sw.fetch('https://html.spec.whatwg.org/', {});
+    await so.fetch('https://html.spec.whatwg.org/', {}); //fetch is happening!
 </script>
 ```

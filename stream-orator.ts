@@ -1,10 +1,11 @@
-import {Options, MakeWritableEvents} from './types';
+import {Options, StreamWriterEvents} from './types';
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
 
-export class MakeWritable extends EventTarget {
-    static emits : {[key in MakeWritableEvents]: MakeWritableEvents} = {
-      "new-chunk": "new-chunk"
+export class StreamOrator extends EventTarget {
+    static emits : {[key in StreamWriterEvents]: StreamWriterEvents} = {
+      "new-chunk": "new-chunk",
+      ""
     }
     constructor(public target: HTMLElement, public options: Options) {
         super();
@@ -89,7 +90,7 @@ export async function streamOrator(href: string, requestInit: RequestInit, targe
     const writeOptions = options || {
       toShadow: false,
     } as Options;
-    const mw = new MakeWritable(target, writeOptions);
+    const mw = new StreamOrator(target, writeOptions);
     await response.body
     .pipeThrough(new TextDecoderStream())
     .pipeTo((<any>target).writable);
