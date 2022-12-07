@@ -1,12 +1,13 @@
-import {Options, StreamOratorEvents} from './types';
+import {Options} from './types';
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
 
+export const newChunk = 'newChunk';
+export const endStream = 'endStream';
+
+
 export class StreamOrator extends EventTarget {
-    static emits : {[key in StreamOratorEvents]: StreamOratorEvents} = {
-      "new-chunk": "new-chunk",
-      ""
-    }
+  
     constructor(public target: HTMLElement, public options: Options) {
         super();
         this.reset();
@@ -23,7 +24,7 @@ export class StreamOrator extends EventTarget {
         realTarget.innerHTML = '';
 
 
-        let idlePromise;
+        let idlePromise: Promise<any> | undefined;
         let charactersWrittenInThisChunk = 0;
         // Sometimes the browser will decide to target 30fps and nothing we do will
         // make it change its mind. To avoid bad behaviour in this case,
@@ -32,7 +33,7 @@ export class StreamOrator extends EventTarget {
         // This is dynamically adjusted according to the measured wait time.
         let charactersPerChunk = 4096;
         // Smooth over several frames to avoid overcorrection for outliers.
-        let lastFewFrames = [];
+        let lastFewFrames: number[] = [];
         const FRAMES_TO_SMOOTH_OVER = 3;
 
         function startNewChunk() {
@@ -51,7 +52,7 @@ export class StreamOrator extends EventTarget {
               }
               const doc = document.implementation.createHTMLDocument();
               doc.write('<div>');
-              realTarget.append(doc.body.firstChild);
+              realTarget.append(doc.body.firstChild!);
               let cursor = 0;
               while (cursor < chunk.length) {
                 const writeCharacters = Math.min(chunk.length - cursor,
@@ -78,6 +79,9 @@ export class StreamOrator extends EventTarget {
 
     }
 
+    fetch(href: string, requestInit: RequestInit){
+      
+    }
 
 }
 
@@ -91,7 +95,7 @@ export async function streamOrator(href: string, requestInit: RequestInit, targe
       toShadow: false,
     } as Options;
     const mw = new StreamOrator(target, writeOptions);
-    await response.body
+    await response.body!
     .pipeThrough(new TextDecoderStream())
     .pipeTo((<any>target).writable);
   }
