@@ -36,7 +36,7 @@ There is an additional optional "options" parameter, where we can utilize shadow
 </script>
 ```
 
-## Access to the stream [TODO]
+## Access to the stream [One Hundo Untested]
 
 If access to the stream chunks is needed, including modifying the chunks, a little more ceremony is needed:
 
