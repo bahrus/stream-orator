@@ -79,27 +79,28 @@ export class StreamOrator extends EventTarget {
 
     }
 
-    fetch(href: string, requestInit: RequestInit){
-      
+    async fetch(href: string, requestInit: RequestInit){
+      const {target} = this;
+      const response = await fetch(href, requestInit); 
+      if(typeof WritableStream === 'undefined'){
+        const text = await response.text();
+        target.innerHTML = text;
+      }else{
+    
+        await response.body!
+        .pipeThrough(new TextDecoderStream())
+        .pipeTo((<any>target).writable);
+      }
     }
 
 }
 
 export async function streamOrator(href: string, requestInit: RequestInit, target:HTMLElement, options?: Options){
-  const response = await fetch(href, requestInit); 
-  if(typeof WritableStream === 'undefined'){
-    const text = await response.text();
-    target.innerHTML = text;
-  }else{
-    const writeOptions = options || {
-      toShadow: false,
-    } as Options;
-    const mw = new StreamOrator(target, writeOptions);
-    await response.body!
-    .pipeThrough(new TextDecoderStream())
-    .pipeTo((<any>target).writable);
-  }
-
+  const writeOptions = options || {
+    toShadow: false,
+  } as Options;
+  const mw = new StreamOrator(target, writeOptions);
+  mw.fetch(href, requestInit);
 }
 
 

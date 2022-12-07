@@ -71,22 +71,24 @@ export class StreamOrator extends EventTarget {
             },
         });
     }
-    fetch(href, requestInit) {
+    async fetch(href, requestInit) {
+        const { target } = this;
+        const response = await fetch(href, requestInit);
+        if (typeof WritableStream === 'undefined') {
+            const text = await response.text();
+            target.innerHTML = text;
+        }
+        else {
+            await response.body
+                .pipeThrough(new TextDecoderStream())
+                .pipeTo(target.writable);
+        }
     }
 }
 export async function streamOrator(href, requestInit, target, options) {
-    const response = await fetch(href, requestInit);
-    if (typeof WritableStream === 'undefined') {
-        const text = await response.text();
-        target.innerHTML = text;
-    }
-    else {
-        const writeOptions = options || {
-            toShadow: false,
-        };
-        const mw = new StreamOrator(target, writeOptions);
-        await response.body
-            .pipeThrough(new TextDecoderStream())
-            .pipeTo(target.writable);
-    }
+    const writeOptions = options || {
+        toShadow: false,
+    };
+    const mw = new StreamOrator(target, writeOptions);
+    mw.fetch(href, requestInit);
 }
