@@ -50,7 +50,9 @@ If access to the stream chunks is needed, including modifying the chunks, a litt
     const so =  new StreamOrator(target, {toShadow: true});
     so.addEventListener('new-chunk', e => {
         const chunk = e.detail.chunk;
-        //search for a string.  If the first part of the string you are searching for is found at the end of the chunk, may need to ask the orator to wait before flushing to the stream
+        //search for a string.  If the first part of the string you 
+        //are searching for is found at the end of the chunk, 
+        //may need to ask the orator to wait before flushing to the stream.
         e.detail.flush = false;
     });
     await so.fetch('https://html.spec.whatwg.org/', {}); //fetch is happening!
