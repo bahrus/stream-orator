@@ -1,4 +1,4 @@
-import {Options} from './types';
+import {Options, NewChunkEvent} from './types';
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
 
@@ -17,6 +17,7 @@ export class StreamOrator extends EventTarget {
         const {target, options} = this; 
         const {toShadow} = options;
         let realTarget = target as Element;
+        const self = this;
         if(toShadow){
           if(target.shadowRoot === null) target.attachShadow({mode: 'open'});
           realTarget = target.shadowRoot as any as Element;
@@ -35,6 +36,7 @@ export class StreamOrator extends EventTarget {
         // Smooth over several frames to avoid overcorrection for outliers.
         let lastFewFrames: number[] = [];
         const FRAMES_TO_SMOOTH_OVER = 3;
+        const chunkBuffer: string[] = [];
 
         function startNewChunk() {
             idlePromise = new Promise(resolve => {
@@ -45,6 +47,21 @@ export class StreamOrator extends EventTarget {
         
         (<any>this.target).writable = new WritableStream({
             async write(chunk) {
+              const permissionToProceedEvent = {
+                chunk,
+                chunkBuffer,
+                flush: true
+              } as NewChunkEvent;
+              self.dispatchEvent(new CustomEvent(newChunk, {
+                detail: permissionToProceedEvent
+              }));
+              if(!permissionToProceedEvent.flush) {
+                chunkBuffer.push(chunk);
+                startNewChunk();
+                //I have no idea if this is right.  Needs lots of testing
+                return;
+              }
+              const chunkBlock = chunkBuffer.join('') + chunk;
               if (idlePromise === undefined) {
                 startNewChunk();
                 await idlePromise;

@@ -15,6 +15,7 @@ export class StreamOrator extends EventTarget {
         const { target, options } = this;
         const { toShadow } = options;
         let realTarget = target;
+        const self = this;
         if (toShadow) {
             if (target.shadowRoot === null)
                 target.attachShadow({ mode: 'open' });
@@ -32,6 +33,7 @@ export class StreamOrator extends EventTarget {
         // Smooth over several frames to avoid overcorrection for outliers.
         let lastFewFrames = [];
         const FRAMES_TO_SMOOTH_OVER = 3;
+        const chunkBuffer = [];
         function startNewChunk() {
             idlePromise = new Promise(resolve => {
                 window.requestAnimationFrame(resolve);
@@ -40,6 +42,21 @@ export class StreamOrator extends EventTarget {
         }
         this.target.writable = new WritableStream({
             async write(chunk) {
+                const permissionToProceedEvent = {
+                    chunk,
+                    chunkBuffer,
+                    flush: true
+                };
+                self.dispatchEvent(new CustomEvent(newChunk, {
+                    detail: permissionToProceedEvent
+                }));
+                if (!permissionToProceedEvent.flush) {
+                    chunkBuffer.push(chunk);
+                    startNewChunk();
+                    //I have no idea if this is right.  Needs lots of testing
+                    return;
+                }
+                const chunkBlock = chunkBuffer.join('') + chunk;
                 if (idlePromise === undefined) {
                     startNewChunk();
                     await idlePromise;

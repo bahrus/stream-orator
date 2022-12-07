@@ -6,6 +6,7 @@ export interface Options {
 export interface NewChunkEvent {
     flush: boolean;
     chunk: string;
+    chunkBuffer: string[];
 }
 
 //export type StreamOratorEvents = 'new-chunk' | 'stream-complete';
