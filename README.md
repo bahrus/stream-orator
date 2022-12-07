@@ -1,6 +1,7 @@
 # stream-orator
 
 [![NPM version](https://badge.fury.io/js/stream-orator.png)](http://badge.fury.io/js/stream-orator)
+[![Playwright Tests](https://github.com/bahrus/stream-orator/actions/workflows/CI.yml/badge.svg?branch=baseline)](https://github.com/bahrus/stream-orator/actions/workflows/CI.yml)
 [![How big is this package in your project?](https://img.shields.io/bundlephobia/minzip/stream-orator?style=for-the-badge)](https://bundlephobia.com/result?p=stream-orator)
 <img src="http://img.badgesize.io/https://cdn.jsdelivr.net/npm/stream-orator?compression=gzip">
 
@@ -21,6 +22,8 @@ Example:
 
 The second parameter is the reqInit object (fetch options).
 
+What this does:  It streams HTML directly from site:  https://html.spec.whatwg.org/ to the div element with id test.  The third parameter is expected to be a reference to an HTML Element (not a querySelector string).
+
 So basically, streamOrator is the fetch function, with a third parameter that specifies the target.
 
 There is an additional optional "options" parameter, where we can utilize shadowDOM:
@@ -31,8 +34,25 @@ There is an additional optional "options" parameter, where we can utilize shadow
     <div id=test></div>
 </details>
 <script type=module>
-    import {streamOrator} from '../stream-orator.js';
+    import {streamOrator} from '../StreamOrator.js';
     streamOrator('https://html.spec.whatwg.org/', {}, test, {toShadow: true});
+</script>
+```
+
+## CORS 
+
+Many sites are not so enlightened as whatwg, and prevent cross origin requests from passing through.
+
+There are various services, which seem to die at an alarming rate.  One such service is [corslet](https://corslet.bahrus.workers.dev/) by yours truly:
+
+```html
+<details>
+    <summary>Supreme Court</summary>
+    <div id=test></div>
+</details>
+<script type=module>
+    import {streamOrator} from '../StreamOrator.js';
+    streamOrator('https://corslet.bahrus.workers.dev/?href=https%3A%2F%2Fwww.supremecourt.gov%2Fabout%2Fmembers_text.aspx&lhs=%3Cdiv+id%3D%22pagemaindiv%22+class%3D%22col-md-9%22%3E&rhs=script&exclude_rhs=on&ts=2022-12-06T00%3A26%3A47.783Z&wrapper=%3Cdiv%3E%7C%3C%2Fdiv%3E&ua=', {}, test);
 </script>
 ```
 

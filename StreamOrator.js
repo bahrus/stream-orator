@@ -100,6 +100,7 @@ export class StreamOrator extends EventTarget {
                 .pipeThrough(new TextDecoderStream())
                 .pipeTo(target.writable);
         }
+        this.dispatchEvent(new Event(endStream));
     }
 }
 export async function streamOrator(href, requestInit, target, options) {

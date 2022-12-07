@@ -108,6 +108,7 @@ export class StreamOrator extends EventTarget {
         .pipeThrough(new TextDecoderStream())
         .pipeTo((<any>target).writable);
       }
+      this.dispatchEvent(new Event(endStream));
     }
 
 }
