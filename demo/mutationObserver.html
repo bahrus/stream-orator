@@ -7,10 +7,10 @@
     <title>Document</title>
 </head>
 <body>
-    <details>
-        <summary>HTML Specs</summary>
+    <!-- <details> -->
+        <!-- <summary>HTML Specs</summary> -->
         <div id=test></div>
-    </details>
+    <!-- </details> -->
     <script type=module>
         //https://stackoverflow.com/questions/59999736/how-to-block-image-from-loading-in-javascript
         const observer = new MutationObserver(mutations => {
@@ -22,7 +22,11 @@
                         const src = node.src;
                         node.setAttribute("data-src",src);
                         node.removeAttribute('src');
-                    }                                      
+                        
+                    }   
+                    if(node.localName === 'image'){
+                        node.removeAttribute('xlink:href');
+                    }                                   
                 });
             });
         });

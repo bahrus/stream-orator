@@ -1,6 +1,7 @@
 export interface Options {
     shadowRoot?: 'open' | 'closed';
     noStreaming: boolean;
+    rootTag?: string;
 }
 
 export interface NewChunkEvent {

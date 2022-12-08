@@ -2,6 +2,7 @@
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
 export const newChunk = 'newChunk';
 export const endStream = 'endStream';
+export const beginStream = 'beginStream';
 export class StreamOrator extends EventTarget {
     target;
     options;
@@ -14,6 +15,7 @@ export class StreamOrator extends EventTarget {
     reset() {
         const { target, options } = this;
         const shadowRoot = options?.shadowRoot;
+        const rootTag = options?.rootTag || "<div>";
         let realTarget = target;
         const self = this;
         if (shadowRoot !== undefined) {
@@ -63,7 +65,8 @@ export class StreamOrator extends EventTarget {
                     startNewChunk();
                 }
                 const doc = document.implementation.createHTMLDocument();
-                doc.write('<div>');
+                console.log(doc.getRootNode());
+                doc.write(rootTag);
                 realTarget.append(doc.body.firstChild);
                 let cursor = 0;
                 while (cursor < chunk.length) {

@@ -4,6 +4,7 @@ import {Options, NewChunkEvent} from './types';
 
 export const newChunk = 'newChunk';
 export const endStream = 'endStream';
+export const beginStream = 'beginStream';
 
 
 export class StreamOrator extends EventTarget {
@@ -16,6 +17,7 @@ export class StreamOrator extends EventTarget {
     reset() {
         const {target, options} = this; 
         const shadowRoot = options?.shadowRoot;
+        const rootTag = options?.rootTag || "<div>";
         let realTarget = target as Element;
         const self = this;
         if(shadowRoot !== undefined){
@@ -68,8 +70,10 @@ export class StreamOrator extends EventTarget {
                 startNewChunk();
               }
               const doc = document.implementation.createHTMLDocument();
-              doc.write('<div>');
+              console.log(doc.getRootNode());
+              doc.write(rootTag);
               realTarget.append(doc.body.firstChild!);
+
               let cursor = 0;
               while (cursor < chunk.length) {
                 const writeCharacters = Math.min(chunk.length - cursor,
