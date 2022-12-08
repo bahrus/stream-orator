@@ -1,5 +1,5 @@
 export interface Options {
-    toShadow: boolean;
+    shadowRoot?: 'open' | 'closed';
     noStreaming: boolean;
 }
 

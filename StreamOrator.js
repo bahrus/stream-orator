@@ -13,12 +13,12 @@ export class StreamOrator extends EventTarget {
     }
     reset() {
         const { target, options } = this;
-        const { toShadow } = options;
+        const shadowRoot = options?.shadowRoot;
         let realTarget = target;
         const self = this;
-        if (toShadow) {
+        if (shadowRoot !== undefined) {
             if (target.shadowRoot === null)
-                target.attachShadow({ mode: 'open' });
+                target.attachShadow({ mode: shadowRoot });
             realTarget = target.shadowRoot;
         }
         realTarget.innerHTML = '';
@@ -91,8 +91,10 @@ export class StreamOrator extends EventTarget {
     async fetch(href, requestInit) {
         const { target } = this;
         const response = await fetch(href, requestInit);
-        if (typeof WritableStream === 'undefined') {
-            console.debug('no writable stream');
+        const supportsWritableStream = typeof WritableStream === 'undefined';
+        if (!supportsWritableStream)
+            console.debug('no writable stream support');
+        if (supportsWritableStream || this.options?.noStreaming) {
             const text = await response.text();
             target.innerHTML = text;
         }
@@ -105,9 +107,6 @@ export class StreamOrator extends EventTarget {
     }
 }
 export async function streamOrator(href, requestInit, target, options) {
-    const writeOptions = options || {
-        toShadow: false,
-    };
-    const mw = new StreamOrator(target, writeOptions);
+    const mw = new StreamOrator(target, options);
     mw.fetch(href, requestInit);
 }

@@ -8,18 +8,18 @@ export const endStream = 'endStream';
 
 export class StreamOrator extends EventTarget {
   
-    constructor(public target: HTMLElement, public options: Options) {
+    constructor(public target: HTMLElement, public options?: Options) {
         super();
         this.reset();
     }
 
     reset() {
         const {target, options} = this; 
-        const {toShadow} = options;
+        const shadowRoot = options?.shadowRoot;
         let realTarget = target as Element;
         const self = this;
-        if(toShadow){
-          if(target.shadowRoot === null) target.attachShadow({mode: 'open'});
+        if(shadowRoot !== undefined){
+          if(target.shadowRoot === null) target.attachShadow({mode: shadowRoot});
           realTarget = target.shadowRoot as any as Element;
         }
         realTarget.innerHTML = '';
@@ -98,13 +98,13 @@ export class StreamOrator extends EventTarget {
 
     async fetch(href: string, requestInit: RequestInit){
       const {target} = this;
-      const response = await fetch(href, requestInit); 
-      if(typeof WritableStream === 'undefined'){
-        console.debug('no writable stream');
+      const response = await fetch(href, requestInit);
+      const supportsWritableStream =  typeof WritableStream === 'undefined';
+      if(!supportsWritableStream) console.debug('no writable stream support');
+      if(supportsWritableStream || this.options?.noStreaming){
         const text = await response.text();
         target.innerHTML = text;
       }else{
-    
         await response.body!
         .pipeThrough(new TextDecoderStream())
         .pipeTo((<any>target).writable);
@@ -115,10 +115,7 @@ export class StreamOrator extends EventTarget {
 }
 
 export async function streamOrator(href: string, requestInit: RequestInit, target:HTMLElement, options?: Options){
-  const writeOptions = options || {
-    toShadow: false,
-  } as Options;
-  const mw = new StreamOrator(target, writeOptions);
+  const mw = new StreamOrator(target, options);
   mw.fetch(href, requestInit);
 }
 
