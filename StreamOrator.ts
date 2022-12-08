@@ -100,7 +100,7 @@ export class StreamOrator extends EventTarget {
       const {target} = this;
       const response = await fetch(href, requestInit); 
       if(typeof WritableStream === 'undefined'){
-        console.log('no writable stream');
+        console.debug('no writable stream');
         const text = await response.text();
         target.innerHTML = text;
       }else{
