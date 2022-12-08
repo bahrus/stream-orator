@@ -10,4 +10,8 @@ export interface NewChunkEvent {
     chunkBuffer: string[];
 }
 
+export interface newStreamEvent {
+    rootNode: Element | ShadowRoot;
+}
+
 //export type StreamOratorEvents = 'new-chunk' | 'stream-complete';

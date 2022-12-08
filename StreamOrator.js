@@ -16,14 +16,19 @@ export class StreamOrator extends EventTarget {
         const { target, options } = this;
         const shadowRoot = options?.shadowRoot;
         const rootTag = options?.rootTag || "<div>";
-        let realTarget = target;
+        let rootNode = target;
         const self = this;
         if (shadowRoot !== undefined) {
             if (target.shadowRoot === null)
                 target.attachShadow({ mode: shadowRoot });
-            realTarget = target.shadowRoot;
+            rootNode = target.shadowRoot;
         }
-        realTarget.innerHTML = '';
+        this.dispatchEvent(new CustomEvent(beginStream, {
+            detail: {
+                rootNode
+            }
+        }));
+        rootNode.innerHTML = '';
         let idlePromise;
         let charactersWrittenInThisChunk = 0;
         // Sometimes the browser will decide to target 30fps and nothing we do will
@@ -42,6 +47,10 @@ export class StreamOrator extends EventTarget {
             });
             charactersWrittenInThisChunk = 0;
         }
+        const doc = document.implementation.createHTMLDocument();
+        //console.log(doc.getRootNode());
+        doc.write(rootTag);
+        rootNode.append(doc.body.firstChild);
         this.target.writable = new WritableStream({
             async write(chunk) {
                 const permissionToProceedEvent = {
@@ -64,10 +73,6 @@ export class StreamOrator extends EventTarget {
                     await idlePromise;
                     startNewChunk();
                 }
-                const doc = document.implementation.createHTMLDocument();
-                console.log(doc.getRootNode());
-                doc.write(rootTag);
-                realTarget.append(doc.body.firstChild);
                 //   const observer = new MutationObserver(mutations => {
                 //     mutations.forEach(({
                 //         addedNodes

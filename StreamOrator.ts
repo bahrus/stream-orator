@@ -1,4 +1,4 @@
-import {Options, NewChunkEvent} from './types';
+import {Options, NewChunkEvent, newStreamEvent} from './types';
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
 
@@ -18,13 +18,18 @@ export class StreamOrator extends EventTarget {
         const {target, options} = this; 
         const shadowRoot = options?.shadowRoot;
         const rootTag = options?.rootTag || "<div>";
-        let realTarget = target as Element;
+        let rootNode = target as Element;
         const self = this;
         if(shadowRoot !== undefined){
           if(target.shadowRoot === null) target.attachShadow({mode: shadowRoot});
-          realTarget = target.shadowRoot as any as Element;
+          rootNode = target.shadowRoot as any as Element;
         }
-        realTarget.innerHTML = '';
+        this.dispatchEvent(new CustomEvent(beginStream, {
+          detail: {
+            rootNode
+          } 
+        }));
+        rootNode.innerHTML = '';
 
 
         let idlePromise: Promise<any> | undefined;
@@ -46,6 +51,11 @@ export class StreamOrator extends EventTarget {
             });
             charactersWrittenInThisChunk = 0;
         }
+        
+        const doc = document.implementation.createHTMLDocument();
+        //console.log(doc.getRootNode());
+        doc.write(rootTag);
+        rootNode.append(doc.body.firstChild!);
         
         (<any>this.target).writable = new WritableStream({
             async write(chunk) {
@@ -69,10 +79,7 @@ export class StreamOrator extends EventTarget {
                 await idlePromise;
                 startNewChunk();
               }
-              const doc = document.implementation.createHTMLDocument();
-              console.log(doc.getRootNode());
-              doc.write(rootTag);
-              realTarget.append(doc.body.firstChild!);
+
             //   const observer = new MutationObserver(mutations => {
             //     mutations.forEach(({
             //         addedNodes
