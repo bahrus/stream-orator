@@ -53,10 +53,22 @@ export class StreamOrator extends EventTarget {
         }
         
         const doc = document.implementation.createHTMLDocument();
-        //console.log(doc.getRootNode());
         doc.write(rootTag);
         rootNode.append(doc.body.firstChild!);
-        
+
+            //   const observer = new MutationObserver(mutations => {
+            //     mutations.forEach(({
+            //         addedNodes
+            //     }) => {
+            //         addedNodes.forEach(node => {
+            //             console.log({node});                                
+            //         });
+            //     });
+            // });
+            // observer.observe(rootNode as Element, {
+            //     childList: true,
+            //     subtree: true
+            // });
         (<any>this.target).writable = new WritableStream({
             async write(chunk) {
               const permissionToProceedEvent = {
@@ -80,19 +92,6 @@ export class StreamOrator extends EventTarget {
                 startNewChunk();
               }
 
-            //   const observer = new MutationObserver(mutations => {
-            //     mutations.forEach(({
-            //         addedNodes
-            //     }) => {
-            //         addedNodes.forEach(node => {
-            //             console.log({node});                                
-            //         });
-            //     });
-            // });
-            // observer.observe(realTarget as Element, {
-            //     childList: true,
-            //     subtree: true
-            // });
               let cursor = 0;
               while (cursor < chunk.length) {
                 const writeCharacters = Math.min(chunk.length - cursor,
