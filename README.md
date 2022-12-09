@@ -26,6 +26,14 @@ What this does:  It streams HTML directly from site:  https://html.spec.whatwg.o
 
 So basically, streamOrator is the fetch function, with a third parameter that specifies the target.
 
+This package is a core package that can enable us to to start simulating the power of an iframe, but within the context of our document.  
+
+The first obstacle to fully achieving this is adjusting the url's for things like hyperlinks, images, script references, etc.
+
+The most effective utility stream-orator provides is an event to subscribe to, giving access to the root node used during the import (which might be newly constructed shadowRoot):
+
+[TODO] provide an example.
+
 There is an additional optional "options" parameter, where we can utilize shadowDOM:
 
 ```html
