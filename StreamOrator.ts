@@ -24,11 +24,7 @@ export class StreamOrator extends EventTarget {
           if(target.shadowRoot === null) target.attachShadow({mode: shadowRoot});
           rootNode = target.shadowRoot as any as Element;
         }
-        this.dispatchEvent(new CustomEvent(beginStream, {
-          detail: {
-            rootNode
-          } 
-        }));
+
         rootNode.innerHTML = '';
 
 
@@ -55,7 +51,11 @@ export class StreamOrator extends EventTarget {
         const doc = document.implementation.createHTMLDocument();
         doc.write(rootTag);
         rootNode.append(doc.body.firstChild!);
-
+        this.dispatchEvent(new CustomEvent(beginStream, {
+          detail: {
+            rootNode
+          } 
+        }));
             //   const observer = new MutationObserver(mutations => {
             //     mutations.forEach(({
             //         addedNodes
