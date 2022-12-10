@@ -9,7 +9,7 @@ export const beginStream = 'beginStream';
 
 export class StreamOrator extends EventTarget {
   
-    constructor(public target: HTMLElement, public options?: Options) {
+    constructor(public target: Element, public options?: Options) {
         super();
         this.reset();
     }

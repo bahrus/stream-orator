@@ -1,6 +1,6 @@
 export interface Options {
     shadowRoot?: 'open' | 'closed';
-    noStreaming: boolean;
+    noStreaming?: boolean;
     rootTag?: string;
 }
 

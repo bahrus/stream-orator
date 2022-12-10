@@ -103,3 +103,11 @@ If access to the stream chunks is needed, including modifying the chunks, a litt
 import 'stream-orator/StreamOrator.js';
 
 ```
+
+## CDN
+
+```JavaScript
+import 'https://esm.run/stream-orator/StreamOrator.js';
+
+```
+
