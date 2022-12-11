@@ -2,12 +2,18 @@ export interface Options {
     shadowRoot?: 'open' | 'closed';
     noStreaming?: boolean;
     rootTag?: string;
+    inserts?: Inserts;
 }
 
 export interface NewChunkEvent {
     flush: boolean;
     chunk: string;
     chunkBuffer: string[];
+}
+
+export interface Inserts {
+    before?: string | HTMLTemplateElement,
+    after?: string | HTMLTemplateElement,
 }
 
 export interface newStreamEvent {

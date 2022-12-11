@@ -43,7 +43,7 @@ There is an additional optional "options" parameter, where we can utilize shadow
 </details>
 <script type=module>
     import {streamOrator} from '../StreamOrator.js';
-    streamOrator('https://html.spec.whatwg.org/', {}, test, {toShadow: true});
+    streamOrator('https://html.spec.whatwg.org/', {}, test, {shadowRoot: 'open'});
 </script>
 ```
 
@@ -51,7 +51,7 @@ There is an additional optional "options" parameter, where we can utilize shadow
 
 Many sites are not so enlightened as whatwg, and prevent cross origin requests from passing through.
 
-There are various services, which seem to die at an alarming rate.  One such service is [corslet](https://corslet.bahrus.workers.dev/) by yours truly:
+There are various services that aim to provide a gateway into public sites, serving as a reverse proxy, which unfortunately seem to die at an alarming rate.  One such service is [corslet](https://corslet.bahrus.workers.dev/) by yours truly:
 
 ```html
 <details>

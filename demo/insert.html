@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <details>
+        <summary>HTML Specs</summary>
+        <div id=test></div>
+    </details>
+    <script type=module>
+        import {streamOrator} from '../StreamOrator.js';
+        streamOrator("https://corslet.bahrus.workers.dev/?href=https%3A%2F%2Fwww.supremecourt.gov%2Fabout%2Fmembers_text.aspx&lhs=%3Cdiv+id%3D%22pagemaindiv%22+class%3D%22col-md-9%22%3E&rhs=script&exclude_rhs=on&ts=2022-12-06T00%3A26%3A47.783Z&wrapper=%3Cdiv%3E%7C%3C%2Fdiv%3E&ua=", {}, test, {
+            inserts: {
+                before: '<div>I am here</div>'
+            }
+        });
+    </script>
+</body>
+</html>

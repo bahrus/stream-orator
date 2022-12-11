@@ -16,6 +16,7 @@ export class StreamOrator extends EventTarget {
         const { target, options } = this;
         const shadowRoot = options?.shadowRoot;
         const rootTag = options?.rootTag || "<div>";
+        const inserts = options?.inserts;
         let rootNode = target;
         const self = this;
         if (shadowRoot !== undefined) {
@@ -24,6 +25,19 @@ export class StreamOrator extends EventTarget {
             rootNode = target.shadowRoot;
         }
         rootNode.innerHTML = '';
+        if (inserts !== undefined) {
+            let { before } = inserts;
+            if (before !== undefined) {
+                if (typeof before === 'string') {
+                    //TODO: sanitize
+                    const templ = document.createElement('template');
+                    templ.innerHTML = before;
+                    before = templ;
+                    inserts.before = templ;
+                }
+                rootNode.appendChild(before.content.cloneNode(true));
+            }
+        }
         let idlePromise;
         let charactersWrittenInThisChunk = 0;
         // Sometimes the browser will decide to target 30fps and nothing we do will
