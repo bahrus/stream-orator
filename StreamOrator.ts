@@ -28,7 +28,7 @@ export class StreamOrator extends EventTarget {
 
         rootNode.innerHTML = '';
         if(inserts !== undefined){
-          let {before} = inserts;
+          let {before, after} = inserts;
           if(before !== undefined){
             if(typeof before === 'string'){
               //TODO: sanitize
@@ -38,6 +38,18 @@ export class StreamOrator extends EventTarget {
               inserts.before = templ;
             }
             rootNode.appendChild(before.content.cloneNode(true));
+          }
+          if(after !== undefined){
+            if(typeof after === 'string'){
+              //TODO: sanitize
+              const templ = document.createElement('template');
+              templ.innerHTML = after;
+              after = templ;
+              inserts.after = templ;
+            }
+            this.addEventListener(endStream, e => {
+              rootNode.appendChild((after as HTMLTemplateElement).content.cloneNode(true));
+            })
           }
         }
 
