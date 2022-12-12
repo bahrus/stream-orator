@@ -1,4 +1,4 @@
-import {Options, NewChunkEvent, newStreamEvent} from './types';
+import {Options, NewChunkEvent, newStreamEvent, Inserts} from './types';
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
 declare const Sanitizer: any;
@@ -17,6 +17,18 @@ export class StreamOrator extends EventTarget {
         this.reset();
     }
 
+    #santize(inserts: Inserts,  key: keyof Inserts): HTMLTemplateElement{
+      let str = inserts[key]!;
+      if(str instanceof HTMLTemplateElement) return str;
+      if(typeof Sanitizer !== undefined){
+        const sanitizer = new Sanitizer(); 
+        str = sanitizer.sanitizeFor("template", str) as string;
+      }
+      const templ = document.createElement('template');
+      templ.innerHTML = str;
+      inserts[key] = templ;
+    }
+
     reset() {
         const {target, options} = this; 
         const shadowRoot = options?.shadowRoot;
@@ -33,31 +45,11 @@ export class StreamOrator extends EventTarget {
         if(inserts !== undefined){
           let {before, after} = inserts;
           if(before !== undefined){
-            if(typeof before === 'string'){
-              //TODO: sanitize
-              const templ = document.createElement('template');
-              if(typeof Sanitizer !== undefined){
-                const sanitizer = new Sanitizer(); 
-                before = sanitizer.sanitizeFor("template", before) as string;
-              }
-              templ.innerHTML = before;
-              before = templ;
-              inserts.before = templ;
-            }
+            before = this.#santize(inserts, 'before');
             rootNode.appendChild(before.content.cloneNode(true));
           }
           if(after !== undefined){
-            if(typeof after === 'string'){
-              //TODO: sanitize
-              const templ = document.createElement('template');
-              if(typeof Sanitizer !== undefined){
-                const sanitizer = new Sanitizer(); 
-                after = sanitizer.sanitizeFor("template", after) as string;
-              }
-              templ.innerHTML = after;
-              after = templ;
-              inserts.after = templ;
-            }
+            after = this.#santize(inserts, 'after');
             this.addEventListener(endStream, e => {
               rootNode.appendChild((after as HTMLTemplateElement).content.cloneNode(true));
             })

@@ -10,6 +10,18 @@ export class StreamOrator extends EventTarget {
         this.options = options;
         this.reset();
     }
+    #santize(inserts, key) {
+        let str = inserts[key];
+        if (str instanceof HTMLTemplateElement)
+            return str;
+        if (typeof Sanitizer !== undefined) {
+            const sanitizer = new Sanitizer();
+            str = sanitizer.sanitizeFor("template", str);
+        }
+        const templ = document.createElement('template');
+        templ.innerHTML = str;
+        inserts[key] = templ;
+    }
     reset() {
         const { target, options } = this;
         const shadowRoot = options?.shadowRoot;
@@ -26,31 +38,11 @@ export class StreamOrator extends EventTarget {
         if (inserts !== undefined) {
             let { before, after } = inserts;
             if (before !== undefined) {
-                if (typeof before === 'string') {
-                    //TODO: sanitize
-                    const templ = document.createElement('template');
-                    if (typeof Sanitizer !== undefined) {
-                        const sanitizer = new Sanitizer();
-                        before = sanitizer.sanitizeFor("template", before);
-                    }
-                    templ.innerHTML = before;
-                    before = templ;
-                    inserts.before = templ;
-                }
+                before = this.#santize(inserts, 'before');
                 rootNode.appendChild(before.content.cloneNode(true));
             }
             if (after !== undefined) {
-                if (typeof after === 'string') {
-                    //TODO: sanitize
-                    const templ = document.createElement('template');
-                    if (typeof Sanitizer !== undefined) {
-                        const sanitizer = new Sanitizer();
-                        after = sanitizer.sanitizeFor("template", after);
-                    }
-                    templ.innerHTML = after;
-                    after = templ;
-                    inserts.after = templ;
-                }
+                after = this.#santize(inserts, 'after');
                 this.addEventListener(endStream, e => {
                     rootNode.appendChild(after.content.cloneNode(true));
                 });
