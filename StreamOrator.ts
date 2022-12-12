@@ -1,6 +1,9 @@
 import {Options, NewChunkEvent, newStreamEvent} from './types';
 // Modified from: https://streams.spec.whatwg.org/demos/streaming-element-backpressure.html
 // with inspiration from https://jsbin.com/kaposeh/edit?js,output
+declare const Sanitizer: any;
+
+
 
 export const newChunk = 'newChunk';
 export const endStream = 'endStream';
@@ -33,6 +36,10 @@ export class StreamOrator extends EventTarget {
             if(typeof before === 'string'){
               //TODO: sanitize
               const templ = document.createElement('template');
+              if(typeof Sanitizer !== undefined){
+                const sanitizer = new Sanitizer(); 
+                before = sanitizer.sanitizeFor("template", before) as string;
+              }
               templ.innerHTML = before;
               before = templ;
               inserts.before = templ;
@@ -43,6 +50,10 @@ export class StreamOrator extends EventTarget {
             if(typeof after === 'string'){
               //TODO: sanitize
               const templ = document.createElement('template');
+              if(typeof Sanitizer !== undefined){
+                const sanitizer = new Sanitizer(); 
+                after = sanitizer.sanitizeFor("template", after) as string;
+              }
               templ.innerHTML = after;
               after = templ;
               inserts.after = templ;
