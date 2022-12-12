@@ -21,6 +21,7 @@ export class StreamOrator extends EventTarget {
         const templ = document.createElement('template');
         templ.innerHTML = str;
         inserts[key] = templ;
+        return templ;
     }
     reset() {
         const { target, options } = this;
