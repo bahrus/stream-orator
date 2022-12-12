@@ -22,12 +22,14 @@ export class StreamOrator extends EventTarget {
       if(str instanceof HTMLTemplateElement) return str;
       if(typeof Sanitizer !== undefined){
         const sanitizer = new Sanitizer(); 
-        str = sanitizer.sanitizeFor("template", str) as string;
+        str = sanitizer.sanitizeFor("template", str) as HTMLTemplateElement;
+      }else{
+        const templ = document.createElement('template');
+        templ.innerHTML = str;
+        str = templ;
       }
-      const templ = document.createElement('template');
-      templ.innerHTML = str;
-      inserts[key] = templ;
-      return templ;
+      inserts[key] = str;
+      return str;
     }
 
     reset() {

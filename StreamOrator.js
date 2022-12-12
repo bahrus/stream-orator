@@ -18,10 +18,13 @@ export class StreamOrator extends EventTarget {
             const sanitizer = new Sanitizer();
             str = sanitizer.sanitizeFor("template", str);
         }
-        const templ = document.createElement('template');
-        templ.innerHTML = str;
-        inserts[key] = templ;
-        return templ;
+        else {
+            const templ = document.createElement('template');
+            templ.innerHTML = str;
+            str = templ;
+        }
+        inserts[key] = str;
+        return str;
     }
     reset() {
         const { target, options } = this;
