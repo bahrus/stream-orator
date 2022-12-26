@@ -38,7 +38,6 @@ export class StreamOrator extends EventTarget {
         const rootTag = options?.rootTag || "<div>";
         const inserts = options?.inserts;
         const between = options?.between;
-        console.log({between});
         let rootNode = target as Element;
         const self = this;
         if(shadowRoot !== undefined){
