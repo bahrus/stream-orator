@@ -3,6 +3,7 @@ export interface Options {
     noStreaming?: boolean;
     rootTag?: string;
     inserts?: Inserts;
+    between?: [lhs: string, rhs: string];
 }
 
 export interface NewChunkEvent {

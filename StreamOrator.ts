@@ -17,7 +17,7 @@ export class StreamOrator extends EventTarget {
         this.reset();
     }
 
-    #santize(inserts: Inserts,  key: keyof Inserts): HTMLTemplateElement{
+    #sanitize(inserts: Inserts,  key: keyof Inserts): HTMLTemplateElement{
       let str = inserts[key]!;
       if(str instanceof HTMLTemplateElement) return str;
       if(typeof Sanitizer !== undefined){
@@ -37,6 +37,7 @@ export class StreamOrator extends EventTarget {
         const shadowRoot = options?.shadowRoot;
         const rootTag = options?.rootTag || "<div>";
         const inserts = options?.inserts;
+        const between = options?.between;
         let rootNode = target as Element;
         const self = this;
         if(shadowRoot !== undefined){
@@ -48,11 +49,11 @@ export class StreamOrator extends EventTarget {
         if(inserts !== undefined){
           let {before, after} = inserts;
           if(before !== undefined){
-            before = this.#santize(inserts, 'before');
+            before = this.#sanitize(inserts, 'before');
             rootNode.appendChild(before.content.cloneNode(true));
           }
           if(after !== undefined){
-            after = this.#santize(inserts, 'after');
+            after = this.#sanitize(inserts, 'after');
             this.addEventListener(endStream, e => {
               rootNode.appendChild((after as HTMLTemplateElement).content.cloneNode(true));
             })
@@ -100,6 +101,9 @@ export class StreamOrator extends EventTarget {
             //     childList: true,
             //     subtree: true
             // });
+        
+        let pastLHS = between === undefined;
+        let beforeRHS = true;
         (<any>this.target).writable = new WritableStream({
             async write(chunk) {
               const permissionToProceedEvent = {
@@ -127,8 +131,36 @@ export class StreamOrator extends EventTarget {
               while (cursor < chunk.length) {
                 const writeCharacters = Math.min(chunk.length - cursor,
                                                  charactersPerChunk - charactersWrittenInThisChunk);
-                let newString = chunk.substr(cursor, writeCharacters);
-                doc.write(newString);
+                let newString = chunk.substr(cursor, writeCharacters) as string;
+                if(between !== undefined){
+                  if(beforeRHS){
+                    
+                    if(pastLHS){
+                      const idxRHS = newString.indexOf(between[1]);
+                      if(idxRHS === -1){
+                        doc.write(newString);
+                      }else{
+                        doc.write(newString.substring(0, idxRHS));
+                        beforeRHS = false;
+                      }
+                    }else{
+                      const idxLHS = newString.indexOf(between[0]);
+                      if(idxLHS > -1){
+                        const idxRHS = newString.indexOf(between[1], idxLHS + 1);
+                        const start = idxLHS + between[0].length;
+                        if(idxRHS === -1){
+                          doc.write(newString.substring(start));
+                        }else{
+                          doc.write(newString.substring(start, idxRHS));
+                        }
+                        pastLHS = true;
+                      }
+                    }
+                  }
+                }else{
+                  doc.write(newString);
+                }
+                
                 cursor += writeCharacters;
                 charactersWrittenInThisChunk += writeCharacters;
                 if (charactersWrittenInThisChunk === charactersPerChunk) {

@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "may-it-serve": "0.0.4",
-    "@playwright/test": "1.28.1",
+    "@playwright/test": "1.29.1",
     "@skypack/package-check": "0.2.2"
   },
   "repository": {
