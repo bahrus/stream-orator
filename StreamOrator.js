@@ -179,25 +179,8 @@ export class StreamOrator extends EventTarget {
             navigator.userAgent &&
             navigator.userAgent.indexOf('CriOS') == -1 &&
             navigator.userAgent.indexOf('FxiOS') == -1)) {
-            let text = await response.text();
-            //console.log({text});
-            const between = this.options?.between;
-            if (between) {
-                const lhs = between[0];
-                const rhs = between[1];
-                const iPosLHS = text.indexOf(lhs);
-                if (iPosLHS !== -1) {
-                    const iPosRHS = text.indexOf(rhs);
-                    if (iPosRHS !== -1) {
-                        text = text.substring(iPosLHS + lhs.length, iPosRHS);
-                        console.log({ text });
-                    }
-                }
-            }
-            if (target.shadowRoot === null) {
-                target.attachShadow({ mode: 'open' });
-            }
-            target.shadowRoot.innerHTML = text;
+            const { nonStream } = await import('./nonStream.js');
+            await nonStream(response, target, this.options);
         }
         else {
             await response.body
