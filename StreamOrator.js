@@ -172,10 +172,10 @@ export class StreamOrator extends EventTarget {
     async fetch(href, requestInit) {
         const { target } = this;
         const response = await fetch(href, requestInit);
-        const supportsWritableStream = typeof WritableStream === 'undefined';
+        const supportsWritableStream = typeof WritableStream !== 'undefined';
         if (!supportsWritableStream)
             console.debug('no writable stream support');
-        if (supportsWritableStream || this.options?.noStreaming) {
+        if (!supportsWritableStream || this.options?.noStreaming) {
             const text = await response.text();
             target.innerHTML = text;
         }
