@@ -9,7 +9,6 @@ export async function nonStream(response, target, options) {
             const iPosRHS = text.indexOf(rhs);
             if (iPosRHS !== -1) {
                 text = text.substring(iPosLHS + lhs.length, iPosRHS);
-                console.log({ text });
             }
         }
     }
