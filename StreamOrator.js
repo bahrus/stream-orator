@@ -29,7 +29,7 @@ export class StreamOrator extends EventTarget {
     reset() {
         const { target, options } = this;
         const shadowRoot = options?.shadowRoot;
-        const rootTag = options?.rootTag || "<div>";
+        const rootTag = options?.rootTag || "<div class=stream-orator-wrapper part=stream-orator-wrapper>";
         const inserts = options?.inserts;
         const between = options?.between;
         let rootNode = target;
