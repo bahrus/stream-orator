@@ -21,13 +21,11 @@
   "types": "types.d.ts",
   "scripts": {
     "test": "playwright test",
-    "serve": "node node_modules/may-it-serve/serve.js",
-    "package-check": "package-check"
+    "serve": "node node_modules/may-it-serve/serve.js"
   },
   "devDependencies": {
-    "may-it-serve": "0.0.4",
-    "@playwright/test": "1.29.1",
-    "@skypack/package-check": "0.2.2"
+    "may-it-serve": "0.0.5",
+    "@playwright/test": "1.35.1"
   },
   "repository": {
     "type": "git",

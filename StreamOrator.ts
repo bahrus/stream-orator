@@ -186,12 +186,12 @@ export class StreamOrator extends EventTarget {
       const response = await fetch(href, requestInit);
       const supportsWritableStream =  typeof WritableStream !== 'undefined';
       if(!supportsWritableStream) console.debug('no writable stream support');
-      if(!supportsWritableStream || this.options?.noStreaming || (
+      if(!supportsWritableStream || this.options?.noStreaming /* || (
         navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
         navigator.userAgent &&
         navigator.userAgent.indexOf('CriOS') == -1 &&
         navigator.userAgent.indexOf('FxiOS') == -1)
-      ){
+      */){
         const {nonStream} = await import('./nonStream.js');
         await nonStream(response, target, this.options);
       }else{
