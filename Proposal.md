@@ -1,4 +1,4 @@
-#  Proposal for server-side "template instantiation" - HTML (including moustache) rewriting
+#  Proposal for server-side "template instantiation" - HTML rewriting (including moustache )
 
 ## Backdrop
 
@@ -18,7 +18,7 @@ Doing so would have a countless number of applications from the mundane but impo
 
 ## Edge of Tomorrow Design Pattern
 
-The first use case, half-way between mundane and revolutionary, for this proposal would be "iframes 2.0" without the performance (and rectangular topology) penalty.
+The first use case, half-way between mundane and revolutionary, for this proposal, would be "iframes 2.0" without the performance (and rectangular topology) penalty.
 
 To quote the good people of [github](https://github.com/github/include-fragment-element#relation-to-server-side-includes):
 
@@ -32,11 +32,11 @@ To quote the good people of [github](https://github.com/github/include-fragment-
 
 >A proxy may attempt to fetch and replace the fragment if the request finishes before the timeout. Otherwise the tag is delivered to the client. This library only implements the client side aspect.
 
-So basically, we can have a four-legged "relay race" to deliver content to the user in the most efficient, cost effective manner possible.  A cdn can deliver an HTML include if it is in cache.  If not, "punt" and hand over the HTML stream to the next layer (while caching the resource in a background thread for future requests) -- on to the service worker, which could isomorphically go through the same exact thought process, punting to a web component or custom element enhancement (during template instantiation or in the live DOM tree (worse-case)).  
+So basically, we can have a four-legged "relay race" to deliver content to the user in the most efficient, cost effective manner possible.  A cdn can deliver an HTML include if it is in cache.  If not, optionally allow for an extremely short time window for retrieving the resource, and "punt" and hand over the HTML stream to the next layer (while caching the resource in a background thread for future requests) should such attempts come up short -- on to the service worker, which could isomorphically go through the same exact thought process, again searching its cache or providing a limited time window to retrieve, before punting to a web component or custom element enhancement (during template instantiation or in the live DOM tree (worse-case)).  
 
-However, currently the service worker is significantly constrained in its ability to seek out these include statements in the HTML, because there is no support, without a [1.2MB](https://github.com/worker-tools/html-rewriter#installation) polyfill, which almost defeats the purpose (high performance).
+However, currently the service worker is significantly constrained in its ability to seek out these include statements in the streaming HTML, partly because there is no support, without a [1.2MB](https://github.com/worker-tools/html-rewriter#installation) polyfill, which almost defeats the purpose (high performance).
 
-Or, if using service workers seems like overkill, a web component or custom enhancement, such as [be-written](https://github.com/bahrus/be-written) has enough complexity on its hands to dealing with. Having to build its own parser to parse the HTML as it streams in, searching for such incudes to inject cached HTML into would again likely measure up in the hundreds of kilobytes, based on the libraries cited above, especially if it strives to do the job right.
+Or, if using service workers seems like overkill, a web component or custom enhancement, such as [be-written](https://github.com/bahrus/be-written) has enough complexity on its hands to dealing with. Having to build its own parser to parse the HTML as it streams in, searching for such incudes to inject cached HTML into would again likely measure up in the hundreds of kilobytes, based on the libraries cited above, especially if it strives to do the job right.  Waiting for the full HTML to stream, before parsing using built-in api's, wouldn't be particularly efficient either.
 
 ## Demonstrating a commitment to progress (iframes 2.0, continued)
 
