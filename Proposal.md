@@ -88,7 +88,7 @@ But the idea here is it shouldn't be an either/or.  Having a SAX Parser like Clo
 
 ### [RSS Feeds](https://paul.kinlan.me/we-need-dom-apis-in-workers/)
 
-I think, [looking at the code](https://github.com/PaulKinlan/topicdeck/blob/master/src/public/scripts/data/common.js#L98), Cloudflare HTMLRewriter would be sufficient.  Unclear if streaming support is needed.
+I think, [looking at the code](https://github.com/PaulKinlan/topicdeck/blob/master/src/public/scripts/data/common.js#L98), full traversal not needed.  Unclear if streaming support is needed or would help.
 
 ### SVG SAX Parsing
 
@@ -102,9 +102,21 @@ Nice use case presented [here](https://github.com/whatwg/dom/issues/1217).  It s
 
 Streaming a must, no need for full traversal.
 
+### Building a table of contents dynamically as content streams in
+
+Suppose we request, within a large a app, an embedded huge document, and the document starts with a table of contents within a menu.  If the table of contents shows (or enables) everything at once, users may get frustrated when the links don't work, not realizing that the issue is that the section the link points to hasn't arrived in the browser, and stop using it.  This could be accomplished with a mutation observer, but a more elegant and direct approach, I think, would be using a SAX parser such as Cloudflare's/Bun's HTMLRewriter.  I think it would perform better as well.  This would not be best solved by a service worker, but rather by two web components or custom enhancements working together in the main thread.
+
+### Deriving state from HTML as it streams in.
+
+Similar to the table of contents example.  Again, mutation observers are probably a working alternative, but at a cost.
+
+### Three.js scenario
+
+Mentioned [here](https://github.com/w3c/ServiceWorker/issues/846#issuecomment-273643690).  Unclear if full traversal needed, or streaming.
+
+
+
 (More to come).
-
-
 
 
 
