@@ -1,4 +1,8 @@
-#  Proposal for server-side "template instantiation" - HTML rewriting (including moustache )
+#  Proposal for server-side "template instantiation" - HTML rewriting (including moustache based content grouping)
+
+Author:  Bruce B. Anderson
+
+Last Updated:  8/30/2023
 
 ## Backdrop
 
@@ -10,7 +14,7 @@ We are seeing significant interest in solutions like [Astro](https://docs.astro.
 
 But I believe there is one significant missing piece in the standards, where the WHATWG could benefit from a bit of humility, perhaps, and absorb ideas in the opposite direction.
 
-Generating HTML with the help of language-neutral, declarative "static" templates (as opposed to servlet-like JavaScript) has proven itself over many [decades](https://w3techs.com/technologies/overview/programming_language/) of web development.  I think providing some server-side primitives to help these engines be able to handle complex scenarios, including embedding dynamic data into a stream of static templates, would be a "slam-dunk" win for the platform.
+Processing HTML streams, plugging in dynamic data into "hotspots," with the help of language-neutral, declarative "static" templates (as opposed to servlet-like JavaScript) has proven itself over many [decades](https://w3techs.com/technologies/overview/programming_language/) of web development.  I think providing some server-side primitives to help these engines be able to handle complex scenarios, including embedding dynamic data into a stream of static templates, would be a "slam-dunk" win for the platform.
 
 Such an idea has taken root in [a number](https://bun.sh/docs/api/html-rewriter#:~:text=Bun%20provides%20a%20fast%20native%20implementation%20of%20the,console.log%28el.tagName%29%3B%20%2F%2F%20%22body%22%20%7C%20%22div%22%20%7C...%20%7D%2C%20%7D%29%3B) [of](https://github.com/worker-tools/html-rewriter) these solutions - the [HTML Rewriter](https://developers.cloudflare.com/workers/runtime-apis/html-rewriter).  This proposal, in essence, seeks to incorporate an enhanced version of that proven, mature solution (with additional support for moustache markers).
 
@@ -22,7 +26,7 @@ The first use case, half-way between mundane and revolutionary, for this proposa
 
 To quote the good people of [github](https://github.com/github/include-fragment-element#relation-to-server-side-includes):
 
->This declarative approach is very similar to SSI or ESI directives. In fact, an edge implementation could replace the markup before its actually delivered to the client.
+>This declarative approach is very similar to SSI or ESI directives. In fact, an edge implementation could replace the markup before it's actually delivered to the client.
 
 ```html
 <include-fragment src="/github/include-fragment/commit-count" timeout="100">
@@ -32,7 +36,7 @@ To quote the good people of [github](https://github.com/github/include-fragment-
 
 >A proxy may attempt to fetch and replace the fragment if the request finishes before the timeout. Otherwise the tag is delivered to the client. This library only implements the client side aspect.
 
-So basically, we can have a four-legged "relay race" to deliver content to the user in the most efficient, cost effective manner possible.  A cdn can deliver an HTML include if it is in cache.  If not, optionally allow for an extremely short time window for retrieving the resource, and "punt" and hand over the HTML stream to the next layer (while caching the resource in a background thread for future requests) should such attempts come up short -- on to the service worker, which could isomorphically go through the same exact thought process, again searching its cache or providing a limited time window to retrieve, before punting to a web component or custom element enhancement (during template instantiation or in the live DOM tree (worse-case)).  
+So basically, we can have a four-legged "relay race" to deliver content to the user in the most efficient, cost effective manner possible.  A cdn can deliver an HTML include if it is in cache.  If not, optionally allow for an extremely short time window for retrieving the resource, and "punt" and hand over the HTML stream to the next layer (while caching the resource in a background thread for future requests) should such attempts come up short -- on to the service worker, which could isomorphically go through the same exact thought process, again searching its cache and then optionally  providing a limited time window to retrieve, before punting to a web component or custom element enhancement (during template instantiation or in the live DOM tree (worse-case)).  
 
 However, currently the service worker is significantly constrained in its ability to seek out these include statements in the streaming HTML, partly because there is no support, without a [1.2MB](https://github.com/worker-tools/html-rewriter#installation) polyfill, which almost defeats the purpose (high performance).
 
@@ -76,12 +80,29 @@ rewriter.transform(
 `));
 ```
 
-Now what kinds of use cases, running in a worker thread, would be better served by a full, traversable DOM tree, versus use cases that could be done with the more streamlined, low memory SAX-like implementation that Cloudflare's/Bun's HTML Rewriter provides?  I'm not yet sure, but I do suspect, beyond sheer simplicity, that there are such use cases.  I will be collecting a list of use cases where HTML parsing in a worker would appear to be a valid use case, and, without doing a deep dive, *guessing* which model would serve better below.  This list is likely to grow (we are after, all, primarily focused on presenting HTML to the user, so I wouldn't be surprised if the list grows quite large).
+Now what kinds of use cases, running in a worker thread, would be better served by a full, traversable DOM tree, versus use cases that could be done with the more streamlined, low memory SAX-like implementation that Cloudflare's/Bun's HTML Rewriter provides, that can process real time as the HTML streams through the pipeline?  I'm not yet sure, but I do suspect, beyond sheer simplicity, that there are such use cases.  I will be collecting a list of use cases where HTML parsing in a worker and/or stream would appear to be a valid use case, and, without doing a deep dive, *guessing* which model would serve better below.  This list is likely to grow (we are after, all, primarily focused on presenting HTML to the user, so I wouldn't be surprised if the list grows quite large).
 
 But the idea here is it shouldn't be an either/or.  Having a SAX Parser like Cloudflare/Bun.js provides, seems like a must.  The DOM traversal argument on top of that seems like icing on the cake, that I hope the platform would eventually support, but which I think could, in the meantime, be built in userland with a relatively tiny footprint.
 
+## Use cases for DOM Parsing third party HTML (or XML) content in a worker or in a stream on the main thread
 
+### [RSS Feeds](https://paul.kinlan.me/we-need-dom-apis-in-workers/)
 
+I think, [looking at the code](https://github.com/PaulKinlan/topicdeck/blob/master/src/public/scripts/data/common.js#L98), Cloudflare HTMLRewriter would be sufficient.  Unclear if streaming support is needed.
+
+### SVG SAX Parsing
+
+Apparently, [this library](https://github.com/jakearchibald/svgomg), uses  SAX Parser so I believe it would benefit from this proposal.
+
+### MS Word integration
+
+Nice use case presented [here](https://github.com/whatwg/dom/issues/1217).  It sounds like full traversal is needed from the description, streaming, not so much.
+
+### Link preview functionality
+
+Streaming a must, no need for full traversal.
+
+(More to come).
 
 
 
