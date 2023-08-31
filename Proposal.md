@@ -98,6 +98,7 @@ But the idea here is it shouldn't be an either/or.  Having a SAX Parser like Clo
 
 [Not](https://en.wikipedia.org/wiki/Health_Level_7) [supporting](http://www.opentraveldevelopersnetwork.com/implementation-guide) [this](https://www.fpml.org/spec/fpml-5-11-7-rec-1/html/confirmation/fpml-5-11-examples-frame.html) [entire](https://www.mismo.org/standards-resources/mismo-engineering-guidelines) [data](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HomeHealthQualityInits/DataSpecifications) format in such a broad space of development, while supporting JSON, while understandable, still smacks of technical bigotry, frankly.  It is unfairly tipping the scales in the IT industry.  And it is  quite an insult to the origins of the web.
 
+### Already cited use cases by people encountering this missing primitive
 
 ### [RSS Feeds](https://paul.kinlan.me/we-need-dom-apis-in-workers/)
 
