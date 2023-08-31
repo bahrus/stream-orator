@@ -116,9 +116,9 @@ Mentioned [here](https://github.com/w3c/ServiceWorker/issues/846#issuecomment-27
 
 ### Pushing work off the main thread.
 
-I'm not advocating that this proposal go anywhere near supporting updating the DOM from a worker (not opposing it either, that just seems like an entirely different proposal).
+I'm not advocating that this proposal go anywhere near supporting updating the DOM from a worker (not opposing it either, that just seems like [an entirely different proposal](https://github.com/whatwg/dom/issues/270), though I suspect such proposals would benefit from being able to parse streaming HTML in the worker, with the help of the platform, but that request isn't made with this particular proposal).
 
-I do think the argument does apply to some degree with 
+I do think the argument does apply to some degree with HTML that streams through the service worker on its way to the browser.  In that setting, there may be cached, persisted data from previous visits in IndexedDB, and in some of those scenarios, the code the would need to manipulate that data could be complex enough that doing it prior to leaving the service worker would make a tremendous amount of sense, from a performance point of view.  I am alluding to [thought-provoking arguments like this one](https://dassur.ma/things/react-redux-comlink/). I do think that the platform's inability to merge such computations with the HTML streaming in, due to lack of SAX parsing support, is a barrier to that vision. 
 
 (More to come).
 
