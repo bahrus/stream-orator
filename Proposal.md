@@ -94,7 +94,7 @@ But the idea here is it shouldn't be an either/or.  Having a SAX Parser like Clo
 
 [XML](https://en.wikipedia.org/wiki/XML_Signature) [still](https://www.xml.com/) [has](https://www.balisage.net/Proceedings/vol21/html/Thompson01/BalisageVol21-Thompson01.html) [many](https://developer.mozilla.org/en-US/docs/Web/SVG) [uses](https://developer.mozilla.org/en-US/docs/Web/SVG), [and](https://en.wikipedia.org/wiki/MathML) [is](https://en.wikipedia.org/wiki/Office_Open_XML) [still] [a](https://en.wikipedia.org/wiki/XMPP) [standard](https://www.w3.org/XML/).
 
-Not supporting this entire data format in such a broad space of development, while supporting JSON, while understandable, still smacks of technical bigotry, frankly.  Quite an insult to the origins of the web.
+[Not](https://en.wikipedia.org/wiki/Health_Level_7) [supporting](http://www.opentraveldevelopersnetwork.com/implementation-guide) [this](https://www.fpml.org/spec/fpml-5-11-7-rec-1/html/confirmation/fpml-5-11-examples-frame.html) [entire](https://www.mismo.org/standards-resources/mismo-engineering-guidelines) [data](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HomeHealthQualityInits/DataSpecifications) format in such a broad space of development, while supporting JSON, while understandable, still smacks of technical bigotry, frankly.  It is unfairly tipping the scales in the IT industry.  And it is  quite an insult to the origins of the web.
 
 
 ### [RSS Feeds](https://paul.kinlan.me/we-need-dom-apis-in-workers/)
