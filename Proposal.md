@@ -1,4 +1,4 @@
-#  Proposal for server/service worker-side "template instantiation" - HTML / XML streaaxm parsing/rewriting (including moustache token events)
+#  Proposal for server/service worker-side "template instantiation" - HTML / XML streaam parsing/rewriting (including moustache token events)
 
 Author:  Bruce B. Anderson
 
@@ -36,7 +36,7 @@ These use cases are just the tip of the iceberg.
 
 [Not](https://en.wikipedia.org/wiki/Health_Level_7) [supporting](http://www.opentraveldevelopersnetwork.com/implementation-guide) [this](https://www.fpml.org/spec/fpml-5-11-7-rec-1/html/confirmation/fpml-5-11-examples-frame.html) [entire](https://www.mismo.org/standards-resources/mismo-engineering-guidelines) [data](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HomeHealthQualityInits/DataSpecifications) format in such a broad space of development, while supporting JSON, while understandable, still strikes me as fundamentally unfair, frankly.  It is tipping the scales in the IT industry,  leaving whole organizations out in the cold, not allowing the two data formats to compete on their own terms.  And it is quite an insult to the origins of the web.
 
-
+To this vast list of shortchanged parties, let me add my own petty grievances and desires, discussed below.
 
 We are seeing significant interest in solutions like [Astro](https://docs.astro.build/en/core-concepts/astro-components/), that enable easy swapping between server-side vs. client-side components.
 
@@ -46,36 +46,25 @@ Such an idea has taken root in [a number](https://bun.sh/docs/api/html-rewriter#
 
 Providing this feature would, I believe, address a significant number of use cases, from the mundane but important "slam-dunk" use cases, to the more revolutionary, as discussed below.
 
-
-
-## Use cases for DOM Parsing content in a worker or in a stream on the main thread
-
-
-
-
-
-### 
-
-
-
 ## Highlights of the proposal
 
-1.  Add native support for a SAX-like API built into the platform, accessible from workers and the main thread.  I think the Cloudflare/Bun.js's HTMLRewriter API is a good, proven, concrete starting point as far as the basic shape of the API, and in how it integrates with (Service) Worker streaming.  
+1.  Add native support for a SAX-like API built into the platform, accessible from workers and the main thread.  I think the Cloudflare/Bun.js's HTMLRewriter API is a good, proven, concrete starting point as far as the basic shape of the API, and in how it integrates with (Service) Worker streaming.
+2.  Crucially, it must provide support for parsing to a rudimentary object model,  similar to parsed JSON.
 2.  Add (a subset of?) XPath support (which the HTMLRewriter API doesn't currently support).
 3.  Using the same basic API shape, support XML with XPath based "events".
 4.  Add special support for configurable interpolation and processing markers, that would allow for templating engines to build on top of (e.g. XSLT, Template Instantiation on the server side, etc.)
 
-This is listed in priority order as I see it.
+This is listed in priority order as I see it, and rolling out in stages seems perfectly appropriate.
 
 ## Highlights of open questions (in my mind)
 
 1.  Cloudflare's HTML Rewriter restricts queries to a small subset of the full CSS Selector specification (and modifies the syntax in some cases).  There may be some very practical reasons for this (and I think we can live with it).  But if it is just a matter of not devoting time to support low usage case scenarios, I don't know that we want to create a permanent "ceiling" in the css queries allowed.
 
-## A list of use cases (likely to grow ad infinitum):
+## My personal use cases:
 
 ## Edge of Tomorrow Architectural Pattern
 
-The first two use cases center around my personal pet peeve, an alarming lack of HTML love shown by the platform.  One could argue that these use cases will become superfluous once the platform builds what it has said it will build.  But at the rate things are progressing, it will be 2000 B.C. before that happens (as the progress has actually been negative over the past ten years).  
+The first two use cases from my list of petty grievances centers around my personal pet peeve, an alarming lack of HTML love shown by the platform.  One could argue that these use cases will become superfluous once the platform builds what it has said it will build.  But at the rate things are progressing, it will be 2000 B.C. before that happens (as the progress has actually been negative over the past ten years).  
 
 The first two use cases center around supporting a userland implementation of "iframes 2.0" without the performance (and rectangular topology) penalty.
 
@@ -91,7 +80,7 @@ To quote the good people of [github](https://github.com/github/include-fragment-
 
 >A proxy may attempt to fetch and replace the fragment if the request finishes before the timeout. Otherwise the tag is delivered to the client. This library only implements the client side aspect.
 
-So basically, we can have a four-legged "relay race" to deliver content to the user in the most efficient, cost effective manner possible, to address that critique head-on.  A server-side cloudflare worker (say) can sift through the HTML it is streaming, and when it encounters an include type instruction, see if it can help.  It can first check it's cache for that resource, and if not found, optionally retrieve an HTML include from a cdn or dynamically generated site or service, that uses HTML server rendering, within an extremely tight window of time.  Once the deadline is hit, "punt" and hand over the HTML stream to the next layer (while caching the resource in a background thread for future requests)  -- on to the service worker, which could isomorphically go through the same exact thought process, again searching its cache and then optionally  providing a limited time window to retrieve, before punting to a web component or custom element enhancement (during template instantiation or in the live DOM tree (worse-case)).  
+So basically, we can have a four-legged "relay race" to deliver content to the user in the most efficient, cost effective manner possible, to address that critique head-on.  A server-side cloudflare worker (say) can sift through the HTML it is streaming, and when it encounters an include type instruction, see if it can provide some user experience help, without causing a white screen of death.  It can first check its cache for that resource, and if not found, optionally retrieve the HTML include from a cdn or dynamically generated site or service, that uses HTML server rendering, within an extremely tight window of time.  Once the deadline is hit, "punt" and hand over the HTML stream to the next layer (while caching the resource in a background thread for future requests)  -- on to the service worker, which could isomorphically go through the same exact thought process, again searching its cache and then optionally  providing a limited time window to retrieve, before punting to a web component or custom element enhancement (during template instantiation or in the live DOM tree (worse-case)).  
 
 However, currently, the service worker is significantly constrained in its ability to seek out these include statements in the streaming HTML, because there is no support, without a [1.2MB](https://github.com/worker-tools/html-rewriter#installation) polyfill, which almost defeats the purpose (high performance).
 
@@ -107,7 +96,7 @@ To quote [this article](https://jakearchibald.com/2021/cors/):
 
 But one issue with embedding an HTML stream from a third party, is needing to adjust hyperlinks, image links, etc so it points to the right place.  This is [probably the most mundane, slam-dunk reason for supporting this proposal](https://developers.cloudflare.com/workers/examples/rewrite-links/).  Again, this is not only an issue in a service worker, but also for the [be-written](https://github.com/bahrus/be-written) custom enhancement, which tries its best, using mutation observers, to adjust links as the HTML streams in and gets written to the DOM.  This solution would be critical for using this library in a production setting outside tightly controlled scenarios.
 
-Other things lack of a SAX Parser makes difficult -- filtering out 
+Other things lack of a SAX Parser makes difficult -- filtering out parts of the HTML stream, like jQurey supports, script tags, style tags, etc.
 
 ## A primitive that would make developing an HTML/XML Parser somewhat trivial
 
