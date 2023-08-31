@@ -14,17 +14,17 @@ We are seeing significant interest in solutions like [Astro](https://docs.astro.
 
 But I believe there is one significant missing piece in the standards, where the WHATWG could benefit from a bit of humility, perhaps, and absorb ideas in the opposite direction.
 
-Processing HTML streams, plugging in dynamic data into "hotspots," with the help of language-neutral, declarative "static" templates (as opposed to servlet-like JavaScript) has proven itself over many [decades](https://w3techs.com/technologies/overview/programming_language/) of web development.  I think providing some server-side primitives to help these engines be able to handle complex scenarios, including embedding dynamic data into a stream of static templates, would be a "slam-dunk" win for the platform.
+Processing HTML streams, plugging in dynamic data into "parts" with the help of language-neutral, declarative "static" templates (as opposed to servlet-like JavaScript) has proven itself over many [decades](https://w3techs.com/technologies/overview/programming_language/) of web development.  I think providing some server-side primitives to help these engines be able to handle complex scenarios, including embedding dynamic data into a stream of static templates, would be a "slam-dunk" win for the platform.
 
 Such an idea has taken root in [a number](https://bun.sh/docs/api/html-rewriter#:~:text=Bun%20provides%20a%20fast%20native%20implementation%20of%20the,console.log%28el.tagName%29%3B%20%2F%2F%20%22body%22%20%7C%20%22div%22%20%7C...%20%7D%2C%20%7D%29%3B) [of](https://github.com/worker-tools/html-rewriter) these solutions - the [HTML Rewriter](https://developers.cloudflare.com/workers/runtime-apis/html-rewriter).  This proposal, in essence, seeks to incorporate an enhanced version of that proven, mature solution (with additional support for moustache markers).
 
 Doing so would have a countless number of applications from the mundane but important "slam-dunk" use cases, to the more revolutionary, as discussed below.
 
-## Edge of Tomorrow Design Pattern
+## Edge of Tomorrow Architectural Pattern
 
 The first use case, half-way between mundane and revolutionary, for this proposal, would be "iframes 2.0" without the performance (and rectangular topology) penalty.
 
-To quote the good people of [github](https://github.com/github/include-fragment-element#relation-to-server-side-includes):
+To quote the good people of [github](https://github.com/github/include-fragment-element#relation-to-server-side-includes), addressing the naysayers who [argue that a client side include promotes an inferior user experience](https://github.com/whatwg/html/issues/2791#issuecomment-311365657):
 
 >This declarative approach is very similar to SSI or ESI directives. In fact, an edge implementation could replace the markup before it's actually delivered to the client.
 
@@ -36,11 +36,11 @@ To quote the good people of [github](https://github.com/github/include-fragment-
 
 >A proxy may attempt to fetch and replace the fragment if the request finishes before the timeout. Otherwise the tag is delivered to the client. This library only implements the client side aspect.
 
-So basically, we can have a four-legged "relay race" to deliver content to the user in the most efficient, cost effective manner possible.  A cdn can deliver an HTML include if it is in cache.  If not, optionally allow for an extremely short time window for retrieving the resource, and "punt" and hand over the HTML stream to the next layer (while caching the resource in a background thread for future requests) should such attempts come up short -- on to the service worker, which could isomorphically go through the same exact thought process, again searching its cache and then optionally  providing a limited time window to retrieve, before punting to a web component or custom element enhancement (during template instantiation or in the live DOM tree (worse-case)).  
+So basically, we can have a four-legged "relay race" to deliver content to the user in the most efficient, cost effective manner possible, to address that critique head on.  A cdn can deliver an HTML include if it is in cache.  If not, optionally allow for an extremely short time window for retrieving the resource, and "punt" and hand over the HTML stream to the next layer (while caching the resource in a background thread for future requests) should such attempts come up short -- on to the service worker, which could isomorphically go through the same exact thought process, again searching its cache and then optionally  providing a limited time window to retrieve, before punting to a web component or custom element enhancement (during template instantiation or in the live DOM tree (worse-case)).  
 
 However, currently the service worker is significantly constrained in its ability to seek out these include statements in the streaming HTML, partly because there is no support, without a [1.2MB](https://github.com/worker-tools/html-rewriter#installation) polyfill, which almost defeats the purpose (high performance).
 
-Or, if using service workers seems like overkill, a web component or custom enhancement, such as [be-written](https://github.com/bahrus/be-written) has enough complexity on its hands to dealing with. Having to build its own parser to parse the HTML as it streams in, searching for such incudes to inject cached HTML into would again likely measure up in the hundreds of kilobytes, based on the libraries cited above, especially if it strives to do the job right.  Waiting for the full HTML to stream, before parsing using built-in api's, wouldn't be particularly efficient either.
+Or, if using service workers seems like overkill, a web component or custom enhancement, such as [be-written](https://github.com/bahrus/be-written) has enough complexity on its hands already it needs to deal with. Having to build its own parser to parse the HTML as it streams in, searching for such includes to inject cached HTML into would again likely measure up in the hundreds of kilobytes, based on the libraries cited above, especially if it strives to do the job right.  Waiting for the full HTML to stream, before parsing using built-in api's, wouldn't be particularly efficient either.
 
 ## Demonstrating a commitment to progress (iframes 2.0, continued)
 
@@ -50,11 +50,11 @@ To quote [this article](https://jakearchibald.com/2021/cors/):
 
 >If a resource never contains private data, then it's totally safe to put Access-Control-Allow-Origin: * on it. Do it! Do it now!
 
-But one issue with embedding an HTML stream from a third party, is needing to adjust hyperlinks, image links, etc so it points to the right place.  This is [probably the most mundane, slam-dunk reason for supporting this proposal](https://developers.cloudflare.com/workers/examples/rewrite-links/).
+But one issue with embedding an HTML stream from a third party, is needing to adjust hyperlinks, image links, etc so it points to the right place.  This is [probably the most mundane, slam-dunk reason for supporting this proposal](https://developers.cloudflare.com/workers/examples/rewrite-links/).  Again, this is not only an issue in a service worker, but also for the [be-written](https://github.com/bahrus/be-written), which tries its best, using mutation observers, to adjust links as the HTML streams in and gets written to the DOM.  This solution would be critical for using this library in a production setting without tightly controlled scenarios.
 
 ## A primitive that would make developing an HTML Parser somewhat trivial
 
-If this primitive was built into the browser, creating a full-blown DOM parser would be quite simple, which has been a common (but often thwarted) use case.  As the [bun.js](https://bun.sh/docs/api/html-rewriter#:~:text=Bun%20provides%20a%20fast%20native%20implementation%20of%20the,console.log%28el.tagName%29%3B%20%2F%2F%20%22body%22%20%7C%20%22div%22%20%7C...%20%7D%2C%20%7D%29%3B) documentation demonstrates:
+If this primitive (Cloudflare/Bun.s's HTML Rewriter) was built into the browser, creating a full-blown DOM parser would be quite simple, which has been a common (but often thwarted) use case.  As the [bun.js](https://bun.sh/docs/api/html-rewriter#:~:text=Bun%20provides%20a%20fast%20native%20implementation%20of%20the,console.log%28el.tagName%29%3B%20%2F%2F%20%22body%22%20%7C%20%22div%22%20%7C...%20%7D%2C%20%7D%29%3B) documentation demonstrates:
 
 ```JavaScript
 const rewriter = new HTMLRewriter();
@@ -104,7 +104,7 @@ Streaming a must, no need for full traversal.
 
 ### Building a table of contents dynamically as content streams in
 
-Suppose we request, within a large a app, an embedded huge document, and the document starts with a table of contents within a menu.  If the table of contents shows (or enables) everything at once, users may get frustrated when the links don't work, not realizing that the issue is that the section the link points to hasn't arrived in the browser, and stop using it.  This could be accomplished with a mutation observer, but a more elegant and direct approach, I think, would be using a SAX parser such as Cloudflare's/Bun's HTMLRewriter.  I think it would perform better as well.  This would not be best solved by a service worker, but rather by two web components or custom enhancements working together in the main thread.
+Suppose we request, within a large a app, an embedded huge document, and the document starts with a table of contents within a menu.  If the table of contents shows (or enables) everything at once, users may get frustrated when the links don't work, not realizing that the issue is that the section the link points to hasn't arrived in the browser, and stop using it.  This could be accomplished with a mutation observer, but a more elegant and direct approach, I think, would be using a SAX parser such as Cloudflare's/Bun's HTMLRewriter.  I think it would perform better as well.  This would not be best solved by a service worker, but rather by two web components or custom enhancements working together in the main thread with streaming HTML.
 
 ### Deriving state from HTML as it streams in.
 
@@ -114,7 +114,11 @@ Similar to the table of contents example.  Again, mutation observers are probabl
 
 Mentioned [here](https://github.com/w3c/ServiceWorker/issues/846#issuecomment-273643690).  Unclear if full traversal needed, or streaming.
 
+### Pushing work off the main thread.
 
+I'm not advocating that this proposal go anywhere near supporting updating the DOM from a worker (not opposing it either, that just seems like an entirely different proposal).
+
+I do think the argument does apply to some degree with 
 
 (More to come).
 
