@@ -10,7 +10,7 @@ One amazing achievement the WHATWG can take pride of in the past decade has been
 
 In particular, the tech stack that service workers tap into  -- including fetch, streaming, ES modules, caching, indexedDB, etc. can be utilized on the server-side, with solutions like CloudFlare Workers, Deno, Bun.js, and increasingly Node.  
 
-But I believe there is one significant missing piece in the standards, where the WHATWG could benefit from a bit of humility, perhaps, and absorb ideas in the opposite direction:  Fundamental support for streaming (x)(ht)ml.
+But I believe there is one significant missing piece in the standards, where the WHATWG could benefit from a bit of humility, perhaps, and absorb ideas (and maybe even code) in the opposite direction:  Fundamental support for streaming (x)(ht)ml.
 
 ## Prior heartaches - already cited use cases by people encountering this missing primitive
 
@@ -24,7 +24,7 @@ Nice use case presented [here](https://github.com/whatwg/dom/issues/1217).
 
 Mentioned [here](https://github.com/w3c/ServiceWorker/issues/846#issuecomment-273643690). 
 
-These use cases are just the tip of the iceberg.  
+These use cases are just the tip of the iceberg.  How long before we here from folks using any of:
 
 ### SOAP/XML Services
 
