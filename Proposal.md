@@ -1,4 +1,4 @@
-#  Proposal for server/service worker-side "template instantiation" - HTML / XML rewriting (including moustache token events)
+#  Proposal for server/service worker-side "template instantiation" - HTML / XML streaaxm parsing/rewriting (including moustache token events)
 
 Author:  Bruce B. Anderson
 
@@ -10,15 +10,53 @@ One amazing achievement the WHATWG can take pride of in the past decade has been
 
 In particular, the tech stack that service workers tap into  -- including fetch, streaming, ES modules, caching, indexedDB, etc. can be utilized on the server-side, with solutions like CloudFlare Workers, Deno, Bun.js, and increasingly Node.  
 
-We are seeing significant interest in solutions like [Astro](https://docs.astro.build/en/core-concepts/astro-components/), that enable easy swapping between server-side vs. client-side components.
+But I believe there is one significant missing piece in the standards, where the WHATWG could benefit from a bit of humility, perhaps, and absorb ideas in the opposite direction:  Fundamental support for streaming (x)(ht)ml.
 
-But I believe there is one significant missing piece in the standards, where the WHATWG could benefit from a bit of humility, perhaps, and absorb ideas in the opposite direction.
+## Prior heartaches - already cited use cases by people encountering this missing primitive
+
+### [RSS Feeds](https://paul.kinlan.me/we-need-dom-apis-in-workers/)
+
+### MS Word integration
+
+Nice use case presented [here](https://github.com/whatwg/dom/issues/1217). 
+
+### ColladaLoader2 support
+
+Mentioned [here](https://github.com/w3c/ServiceWorker/issues/846#issuecomment-273643690). 
+
+These use cases are just the tip of the iceberg.  
+
+### SOAP/XML Services
+
+[They're](http://www.gcomputer.net/webservices/dilbert.asmx) [still](https://www.dataaccess.com/webservicesserver/NumberConversion.wso) [out](https://www.dataaccess.com/webservicesserver/TextCasing.wso) [there.](http://www.xml-webservices.net/services/conversions/euro_convert/euro_conver.asmx)
+
+### XML Vocabularies
+
+[XML](https://en.wikipedia.org/wiki/XML_Signature) [still](https://www.xml.com/) [has](https://www.balisage.net/Proceedings/vol21/html/Thompson01/BalisageVol21-Thompson01.html) [many](https://developer.mozilla.org/en-US/docs/Web/SVG) [uses](https://developer.mozilla.org/en-US/docs/Web/SVG), [and](https://en.wikipedia.org/wiki/MathML) [is](https://en.wikipedia.org/wiki/Office_Open_XML) [still] [a](https://en.wikipedia.org/wiki/XMPP) [standard](https://www.w3.org/XML/).
+
+[Not](https://en.wikipedia.org/wiki/Health_Level_7) [supporting](http://www.opentraveldevelopersnetwork.com/implementation-guide) [this](https://www.fpml.org/spec/fpml-5-11-7-rec-1/html/confirmation/fpml-5-11-examples-frame.html) [entire](https://www.mismo.org/standards-resources/mismo-engineering-guidelines) [data](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HomeHealthQualityInits/DataSpecifications) format in such a broad space of development, while supporting JSON, while understandable, still strikes me as fundamentally unfair, frankly.  It is tipping the scales in the IT industry,  leaving whole organizations out in the cold, not allowing the two data formats to compete on their own terms.  And it is quite an insult to the origins of the web.
+
+
+
+We are seeing significant interest in solutions like [Astro](https://docs.astro.build/en/core-concepts/astro-components/), that enable easy swapping between server-side vs. client-side components.
 
 Processing HTML streams, plugging in / replacing dynamic data into "parts" with the help of language-neutral, declarative "static" templates (as opposed to servlet-like JavaScript) has proven itself over many [decades](https://w3techs.com/technologies/overview/programming_language/) of web development.  I think providing some server-side primitives to help these engines be able to handle complex scenarios, including embedding dynamic data into a stream of static templates or dynamic third party content, would be a "slam-dunk" win for the platform.
 
 Such an idea has taken root in [a number](https://bun.sh/docs/api/html-rewriter#:~:text=Bun%20provides%20a%20fast%20native%20implementation%20of%20the,console.log%28el.tagName%29%3B%20%2F%2F%20%22body%22%20%7C%20%22div%22%20%7C...%20%7D%2C%20%7D%29%3B) [of](https://github.com/worker-tools/html-rewriter) these solutions - the [HTML Rewriter](https://developers.cloudflare.com/workers/runtime-apis/html-rewriter).  This proposal, in essence, seeks to incorporate an enhanced version of that proven, mature solution (with additional support for moustache markers).  Honorable mentions go to [other](https://www.npmjs.com/package/@trysound/sax) [packages](https://www.npmjs.com/package/sax) which certainly get quite a few downloads, if those numbers are to be believed.
 
 Providing this feature would, I believe, address a significant number of use cases, from the mundane but important "slam-dunk" use cases, to the more revolutionary, as discussed below.
+
+
+
+## Use cases for DOM Parsing content in a worker or in a stream on the main thread
+
+
+
+
+
+### 
+
+
 
 ## Highlights of the proposal
 
@@ -105,31 +143,7 @@ Now what kinds of use cases, running in a worker thread, would be better served 
 
 But the idea here is it shouldn't be an either/or.  Having a SAX Parser like Cloudflare/Bun.js provides, seems like a must.  The DOM traversal argument on top of that seems like icing on the cake, that I hope the platform would eventually support, but which I think could, in the meantime, be built in userland with a relatively tiny footprint.
 
-## Use cases for DOM Parsing content in a worker or in a stream on the main thread
 
-### SOAP/XML Services
-
-[They're](http://www.gcomputer.net/webservices/dilbert.asmx) [still](https://www.dataaccess.com/webservicesserver/NumberConversion.wso) [out](https://www.dataaccess.com/webservicesserver/TextCasing.wso) [there.](http://www.xml-webservices.net/services/conversions/euro_convert/euro_conver.asmx)
-
-### XML Vocabularies
-
-[XML](https://en.wikipedia.org/wiki/XML_Signature) [still](https://www.xml.com/) [has](https://www.balisage.net/Proceedings/vol21/html/Thompson01/BalisageVol21-Thompson01.html) [many](https://developer.mozilla.org/en-US/docs/Web/SVG) [uses](https://developer.mozilla.org/en-US/docs/Web/SVG), [and](https://en.wikipedia.org/wiki/MathML) [is](https://en.wikipedia.org/wiki/Office_Open_XML) [still] [a](https://en.wikipedia.org/wiki/XMPP) [standard](https://www.w3.org/XML/).
-
-[Not](https://en.wikipedia.org/wiki/Health_Level_7) [supporting](http://www.opentraveldevelopersnetwork.com/implementation-guide) [this](https://www.fpml.org/spec/fpml-5-11-7-rec-1/html/confirmation/fpml-5-11-examples-frame.html) [entire](https://www.mismo.org/standards-resources/mismo-engineering-guidelines) [data](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HomeHealthQualityInits/DataSpecifications) format in such a broad space of development, while supporting JSON, while understandable, still strikes me as fundamentally unfair, frankly.  It is tipping the scales in the IT industry, not allowing the two data formats to compete on their own terms.  And it is quite an insult to the origins of the web.
-
-### Already cited use cases by people encountering this missing primitive
-
-### [RSS Feeds](https://paul.kinlan.me/we-need-dom-apis-in-workers/)
-
-I think, [looking at the code](https://github.com/PaulKinlan/topicdeck/blob/master/src/public/scripts/data/common.js#L98), full traversal not needed.  Unclear if streaming support is needed or would help.
-
-### SVG SAX Parsing
-
-Apparently, [this library](https://github.com/jakearchibald/svgomg), uses a SAX Parser so I believe it would benefit from this proposal.
-
-### MS Word integration
-
-Nice use case presented [here](https://github.com/whatwg/dom/issues/1217).  It sounds like full traversal is needed from the description, streaming, not so much.
 
 ### Link preview functionality
 
@@ -143,9 +157,7 @@ Suppose we request, within a large app, an embedded huge document, and the docum
 
 Similar to the table of contents example.  Again, mutation observers are probably a working alternative, but at a cost.
 
-### Three.js scenario
 
-Mentioned [here](https://github.com/w3c/ServiceWorker/issues/846#issuecomment-273643690).  Unclear if full traversal needed, or streaming.
 
 ### Pushing work off the main thread.
 
