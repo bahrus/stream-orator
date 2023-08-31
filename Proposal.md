@@ -97,7 +97,7 @@ To quote [this article](https://jakearchibald.com/2021/cors/):
 
 But one issue with embedding an HTML stream from a third party, is needing to adjust hyperlinks, image links, etc so it points to the right place.  This is [probably the most mundane, slam-dunk reason for supporting this proposal](https://developers.cloudflare.com/workers/examples/rewrite-links/).  Again, this is not only an issue in a service worker, but also for the [be-written](https://github.com/bahrus/be-written) custom enhancement, which tries its best, using mutation observers, to adjust links as the HTML streams in and gets written to the DOM.  This solution would be critical for using this library in a production setting outside tightly controlled scenarios.
 
-Other things lack of a SAX Parser makes difficult -- filtering out parts of the HTML stream, like jQurey supports, script tags, style tags, etc.
+Other things lack of a SAX Parser makes difficult -- filtering out parts of the HTML stream, like jQuery supports, script tags, style tags, etc.
 
 ## A primitive that would make developing an HTML/XML Parser somewhat trivial
 
