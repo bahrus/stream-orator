@@ -1,4 +1,4 @@
-#  Proposal for server/service worker-side "template instantiation" - HTML / XML streaam parsing/rewriting (including moustache token events)
+#  Proposal for server/service worker-side "template instantiation" - HTML / XML stream parsing/rewriting (including moustache token events)
 
 Author:  Bruce B. Anderson
 
@@ -48,17 +48,18 @@ Providing this feature would, I believe, address a significant number of use cas
 
 ## Highlights of the proposal
 
-1.  Add native support for a SAX-like API built into the platform, accessible from workers and the main thread.  I think the Cloudflare/Bun.js's HTMLRewriter API is a good, proven, concrete starting point as far as the basic shape of the API, and in how it integrates with (Service) Worker streaming.
-2.  Crucially, it must provide support for parsing to a rudimentary object model,  similar to parsed JSON.
-2.  Add (a subset of?) XPath support (which the HTMLRewriter API doesn't currently support).
-3.  Using the same basic API shape, support XML with XPath based "events".
-4.  Add special support for configurable interpolation and processing markers, that would allow for templating engines to build on top of (e.g. XSLT, Template Instantiation on the server side, etc.)
+1.  Add native support for a SAX-like API built into the platform, accessible from workers and the main thread, capable of working with HTML5, with all its quirks.  I think the Cloudflare/Bun.js's HTMLRewriter API is a good, proven, concrete starting point as far as the basic shape of the API, and in how it integrates with (Service) Worker streaming.
+2.  Crucially, it must provide support for parsing to a rudimentary object model,  similar to parsed JSON, which is certainly the case with the HTML rewriter.
+3.  Add (a subset of?) XPath support (which the HTMLRewriter API doesn't currently support).
+4.  Using the same basic API shape, support XML with XPath based "events".
+5.  Add special support for configurable interpolation and processing markers, that would allow for templating engines to build on top of (e.g. XSLT, Template Instantiation on the server side, etc.)
 
 This is listed in priority order as I see it, and rolling out in stages seems perfectly appropriate.
 
 ## Highlights of open questions (in my mind)
 
 1.  Cloudflare's HTML Rewriter restricts queries to a small subset of the full CSS Selector specification (and modifies the syntax in some cases).  There may be some very practical reasons for this (and I think we can live with it).  But if it is just a matter of not devoting time to support low usage case scenarios, I don't know that we want to create a permanent "ceiling" in the css queries allowed.
+
 
 ## My personal use cases:
 
