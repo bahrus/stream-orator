@@ -44,7 +44,7 @@ Or, if using service workers seems like overkill, a web component or custom enha
 
 ## Demonstrating a commitment to progress (iframes 2.0, continued)
 
-If the WHATWG is at all interested in improving the end user experience, especially for those dealing with expensive networks (which I suspect they are), then I think they should be bold and show some leadership, and help us buck the industries' addiction to restful API mechanism as the only way (outside iframes) for sharing content.
+If the WHATWG is at all interested in improving the end user experience, especially for those dealing with expensive networks (which I suspect they are, at least in theory), then I think they should be bold and show some leadership, and help us buck the industries' addiction to restful API mechanism as the only way (outside iframes) for sharing content.
 
 To quote [this article](https://jakearchibald.com/2021/cors/):
 
