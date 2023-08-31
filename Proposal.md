@@ -129,11 +129,9 @@ rewriter.transform(
 
 I don't mean to underestimate that effort -- creating a simple object structure, like JSON parsing provides, seems almost trivial.  But supporting CSS or XPATH querying does seem like significantly more work, and likewise, increasing the payload size.
 
-Now what kinds of use cases, running in a worker thread, would be better served by a full, bi-directional traversing of the DOM tree, versus use cases that could be done with the more streamlined, low memory SAX-like implementation that Cloudflare's/Bun's HTML Rewriter provides, that can process real time as the HTML/XML streams through the pipeline?  I'm not yet sure, but I do suspect, beyond sheer simplicity, that there are such use cases.  I will be collecting a list of use cases where HTML/XML parsing in a worker and/or stream would appear to be a valid use case, and, without doing a deep dive, *guessing* which model would serve better below in some cases.  This list is likely to grow (we are after, all, primarily focused on presenting HTML to the user, so I wouldn't be surprised if the list grows quite large).
+Now what kinds of use cases, running in a worker thread, would be better served by a full, bi-directional traversing of the DOM tree, versus use cases that could be done with the more streamlined, low memory SAX-like implementation that Cloudflare's/Bun's HTML Rewriter provides, that can process real time as the HTML/XML streams through the pipeline?  I'm not yet sure, but I do suspect, beyond sheer simplicity, that there are such use cases.  
 
 But the idea here is it shouldn't be an either/or.  Having a SAX Parser like Cloudflare/Bun.js provides, seems like a must.  The DOM traversal argument on top of that seems like icing on the cake, that I hope the platform would eventually support, but which I think could, in the meantime, be built in userland with a relatively tiny footprint.
-
-
 
 ### Link preview functionality
 
@@ -146,7 +144,6 @@ Suppose we request, within a large app, an embedded huge document, and the docum
 ### Deriving state from HTML as it streams in.
 
 Similar to the table of contents example.  Again, mutation observers are probably a working alternative, but at a cost.
-
 
 
 ### Pushing work off the main thread.
