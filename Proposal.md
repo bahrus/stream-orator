@@ -86,11 +86,15 @@ Now what kinds of use cases, running in a worker thread, would be better served 
 
 But the idea here is it shouldn't be an either/or.  Having a SAX Parser like Cloudflare/Bun.js provides, seems like a must.  The DOM traversal argument on top of that seems like icing on the cake, that I hope the platform would eventually support, but which I think could, in the meantime, be built in userland with a relatively tiny footprint.
 
-## Use cases for DOM Parsing third party HTML (or XML) content in a worker or in a stream on the main thread
+## Use cases for DOM Parsing content in a worker or in a stream on the main thread
 
 ### SOAP/XML Services
 
-[They're still out there.](http://www.xml-webservices.net/services/conversions/euro_convert/euro_conver.asmx)
+[They're](http://www.gcomputer.net/webservices/dilbert.asmx) [still](https://www.dataaccess.com/webservicesserver/NumberConversion.wso) [out](https://www.dataaccess.com/webservicesserver/TextCasing.wso) [there.](http://www.xml-webservices.net/services/conversions/euro_convert/euro_conver.asmx)
+
+[XML](https://en.wikipedia.org/wiki/XML_Signature) [still](https://www.xml.com/) [has](https://www.balisage.net/Proceedings/vol21/html/Thompson01/BalisageVol21-Thompson01.html) [many](https://developer.mozilla.org/en-US/docs/Web/SVG) [uses](https://developer.mozilla.org/en-US/docs/Web/SVG), [and](https://en.wikipedia.org/wiki/MathML) [is](https://en.wikipedia.org/wiki/Office_Open_XML) [still] [a](https://en.wikipedia.org/wiki/XMPP) [standard](https://www.w3.org/XML/).
+
+Not supporting this entire data format in such a broad space of development, while supporting JSON, while understandable, still smacks of technical bigotry, frankly.  Quite an insult to the origins of the web.
 
 
 ### [RSS Feeds](https://paul.kinlan.me/we-need-dom-apis-in-workers/)
