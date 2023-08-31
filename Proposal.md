@@ -1,8 +1,8 @@
-#  Proposal for server-side "template instantiation" - HTML rewriting (including moustache based content grouping)
+#  Proposal for server/service worker-side "template instantiation" - HTML rewriting (including moustache token events)
 
 Author:  Bruce B. Anderson
 
-Last Updated:  8/30/2023
+Last Updated:  8/31/2023
 
 ## Backdrop
 
@@ -14,7 +14,7 @@ We are seeing significant interest in solutions like [Astro](https://docs.astro.
 
 But I believe there is one significant missing piece in the standards, where the WHATWG could benefit from a bit of humility, perhaps, and absorb ideas in the opposite direction.
 
-Processing HTML streams, plugging in dynamic data into "parts" with the help of language-neutral, declarative "static" templates (as opposed to servlet-like JavaScript) has proven itself over many [decades](https://w3techs.com/technologies/overview/programming_language/) of web development.  I think providing some server-side primitives to help these engines be able to handle complex scenarios, including embedding dynamic data into a stream of static templates, would be a "slam-dunk" win for the platform.
+Processing HTML streams, plugging in / replacing dynamic data into "parts" with the help of language-neutral, declarative "static" templates (as opposed to servlet-like JavaScript) has proven itself over many [decades](https://w3techs.com/technologies/overview/programming_language/) of web development.  I think providing some server-side primitives to help these engines be able to handle complex scenarios, including embedding dynamic data into a stream of static templates or dynamic third party content, would be a "slam-dunk" win for the platform.
 
 Such an idea has taken root in [a number](https://bun.sh/docs/api/html-rewriter#:~:text=Bun%20provides%20a%20fast%20native%20implementation%20of%20the,console.log%28el.tagName%29%3B%20%2F%2F%20%22body%22%20%7C%20%22div%22%20%7C...%20%7D%2C%20%7D%29%3B) [of](https://github.com/worker-tools/html-rewriter) these solutions - the [HTML Rewriter](https://developers.cloudflare.com/workers/runtime-apis/html-rewriter).  This proposal, in essence, seeks to incorporate an enhanced version of that proven, mature solution (with additional support for moustache markers).  Honorable mentions go to [other](https://www.npmjs.com/package/@trysound/sax) [packages](https://www.npmjs.com/package/sax) which certainly get quite a few downloads, if those numbers are to be believed.
 
@@ -40,7 +40,7 @@ So basically, we can have a four-legged "relay race" to deliver content to the u
 
 However, currently the service worker is significantly constrained in its ability to seek out these include statements in the streaming HTML, because there is no support, without a [1.2MB](https://github.com/worker-tools/html-rewriter#installation) polyfill, which almost defeats the purpose (high performance).
 
-Or, if using service workers seems like overkill, a web component or custom enhancement, such as [be-written](https://github.com/bahrus/be-written) has enough complexity on its hands already it needs to deal with. Having to build its own parser to parse the HTML as it streams in, searching for such includes to inject cached HTML into would again likely measure up in the hundreds of kilobytes, based on the libraries cited above, especially if it strives to do the job right.  Waiting for the full HTML to stream, before parsing using built-in api's, wouldn't be particularly efficient either.
+Or, if using service workers seems like overkill, a web component or custom enhancement, such as [be-written](https://github.com/bahrus/be-written) could handle includes embedded in the streaming HTML.  But such solutions have enough complexity on its hands already it needs to deal with. Having to build its own parser to parse the HTML as it streams in, searching for such includes to inject cached HTML into would again likely measure up in the hundreds of kilobytes or more, based on the libraries cited above, especially if it strives to do the job right.  Waiting for the full HTML to stream, before parsing using built-in api's, wouldn't be particularly efficient either.
 
 ## Demonstrating a commitment to progress (iframes 2.0, continued)
 
@@ -88,6 +88,11 @@ But the idea here is it shouldn't be an either/or.  Having a SAX Parser like Clo
 
 ## Use cases for DOM Parsing third party HTML (or XML) content in a worker or in a stream on the main thread
 
+### SOAP/XML Services
+
+[They're still out there.](http://www.xml-webservices.net/services/conversions/euro_convert/euro_conver.asmx)
+
+
 ### [RSS Feeds](https://paul.kinlan.me/we-need-dom-apis-in-workers/)
 
 I think, [looking at the code](https://github.com/PaulKinlan/topicdeck/blob/master/src/public/scripts/data/common.js#L98), full traversal not needed.  Unclear if streaming support is needed or would help.
@@ -106,7 +111,7 @@ Streaming a must, no need for full traversal.
 
 ### Building a table of contents dynamically as content streams in
 
-Suppose we request, within a large a app, an embedded huge document, and the document starts with a table of contents within a menu.  If the table of contents shows (or enables) everything at once, users may get frustrated when the links don't work, not realizing that the issue is that the section the link points to hasn't arrived in the browser, and stop using it.  This could be accomplished with a mutation observer, but a more elegant and direct approach, I think, would be using a SAX parser such as Cloudflare's/Bun's HTMLRewriter.  I think it would perform better as well.  This would not be best solved by a service worker, but rather by two web components or custom enhancements working together in the main thread with streaming HTML.
+Suppose we request, within a large app, an embedded huge document, and the document starts with a table of contents within a menu.  If the table of contents shows (or enables) everything at once, users may get frustrated when the links don't work, not realizing that the issue is that the section the link points to hasn't arrived in the browser, and stop using it.  This could be accomplished with a mutation observer, but a more elegant and direct approach, I think, would be using a SAX parser such as Cloudflare's/Bun's HTMLRewriter.  I think it would perform better as well.  This would not be best solved by a service worker, but rather by two web components or custom enhancements working together in the main thread with streaming HTML.
 
 ### Deriving state from HTML as it streams in.
 
@@ -120,7 +125,7 @@ Mentioned [here](https://github.com/w3c/ServiceWorker/issues/846#issuecomment-27
 
 I'm not advocating that this proposal go anywhere near supporting updating the DOM from a worker (not opposing it either, that just seems like [an entirely different proposal](https://github.com/whatwg/dom/issues/270), though I suspect such proposals would benefit from being able to parse streaming HTML in the worker, with the help of the platform, but that request isn't made with this particular proposal).
 
-I do think the argument does apply to some degree with HTML that streams through the service worker on its way to the browser.  In that setting, there may be cached, persisted data from previous visits in IndexedDB, and in some of those scenarios, the code the would need to manipulate that data could be complex enough that doing it prior to leaving the service worker would make a tremendous amount of sense, from a performance point of view.  I am alluding to [thought-provoking arguments like this one](https://dassur.ma/things/react-redux-comlink/). I do think that the platform's inability to merge such computations with the HTML streaming in, due to lack of SAX parsing support, is a barrier to that vision. 
+I do think the argument does apply to some degree with HTML that streams through the service worker on its way to the browser.  In that setting, there may be cached, persisted data from previous visits in IndexedDB, and in some of those scenarios, the code that would need to manipulate that data could be complex enough that doing it prior to leaving the service worker would make a tremendous amount of sense, from a performance point of view.  I am alluding to [thought-provoking arguments like this one](https://dassur.ma/things/react-redux-comlink/). I do think that the platform's inability to merge such computations with the HTML streaming in, due to lack of SAX parsing support, is a barrier to that vision. 
 
 (More to come).
 
