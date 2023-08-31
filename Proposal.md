@@ -1,4 +1,4 @@
-#  Proposal for server/service worker-side "template instantiation" - HTML rewriting (including moustache token events)
+#  Proposal for server/service worker-side "template instantiation" - HTML / XML rewriting (including moustache token events)
 
 Author:  Bruce B. Anderson
 
@@ -20,9 +20,26 @@ Such an idea has taken root in [a number](https://bun.sh/docs/api/html-rewriter#
 
 Providing this feature would, I believe, address a significant number of use cases, from the mundane but important "slam-dunk" use cases, to the more revolutionary, as discussed below.
 
+## Highlights of the proposal
+
+1.  Add native support for a SAX-like API built into the platform, accessible from workers and the main thread.  I think the Cloudflare/Bun.js's HTMLRewriter API is a good, proven, concrete starting point as far as the basic shape of the API, and in how it integrates with (Service) Worker streaming.  
+2.  Add (a subset of?) XPath support (which the HTMLRewriter API doesn't currently support).
+3.  Using the same basic API shape, support XML with XPath based "events".
+4.  Add special support for configurable interpolation and processing markers, that would allow for templating engines to build on top of (e.g. XSLT, Template Instantiation on the server side, etc.)
+
+This is listed in priority order as I see it.
+
+## Highlights of open questions (in my mind)
+
+1.  Cloudflare's HTML Rewriter restricts queries to a small subset of the full CSS Selector specification (and modifies the syntax in some cases).  There may be some very practical reasons for this (and I think we can live with it).  But if it is just a matter of not devoting time to support low usage case scenarios, I don't know that we want to create a permanent "ceiling" in the css queries allowed.
+
+## A list of use cases (likely to grow ad infinitum):
+
 ## Edge of Tomorrow Architectural Pattern
 
-The first use case, half-way between mundane and revolutionary, for this proposal, would be "iframes 2.0" without the performance (and rectangular topology) penalty.
+The first two use cases center around my personal pet peeve, an alarming lack of HTML love shown by the platform.  One could argue that these use cases will become superfluous once the platform builds what it has said it will build.  But at the rate things are progressing, it will be 2000 B.C. before that happens (as the progress has actually been negative over the past ten years).  
+
+The first two use cases center around supporting a userland implementation of "iframes 2.0" without the performance (and rectangular topology) penalty.
 
 To quote the good people of [github](https://github.com/github/include-fragment-element#relation-to-server-side-includes), addressing the naysayers who [argue that a client side include promotes an inferior user experience](https://github.com/whatwg/html/issues/2791#issuecomment-311365657):
 
@@ -36,15 +53,15 @@ To quote the good people of [github](https://github.com/github/include-fragment-
 
 >A proxy may attempt to fetch and replace the fragment if the request finishes before the timeout. Otherwise the tag is delivered to the client. This library only implements the client side aspect.
 
-So basically, we can have a four-legged "relay race" to deliver content to the user in the most efficient, cost effective manner possible, to address that critique head-on.  A server-side cloudflare worker (say) can retrieve an HTML include from a cdn, when it detects includes in the HTML stream it is delivering, assuming the resource is already in its cache.  If not, optionally allow for an extremely short time window for retrieving the resource, and "punt" and hand over the HTML stream to the next layer (while caching the resource in a background thread for future requests) should such attempts come up short -- on to the service worker, which could isomorphically go through the same exact thought process, again searching its cache and then optionally  providing a limited time window to retrieve, before punting to a web component or custom element enhancement (during template instantiation or in the live DOM tree (worse-case)).  
+So basically, we can have a four-legged "relay race" to deliver content to the user in the most efficient, cost effective manner possible, to address that critique head-on.  A server-side cloudflare worker (say) can sift through the HTML it is streaming, and when it encounters an include type instruction, see if it can help.  It can first check it's cache for that resource, and if not found, optionally retrieve an HTML include from a cdn or dynamically generated site or service, that uses HTML server rendering, within an extremely tight window of time.  Once the deadline is hit, "punt" and hand over the HTML stream to the next layer (while caching the resource in a background thread for future requests)  -- on to the service worker, which could isomorphically go through the same exact thought process, again searching its cache and then optionally  providing a limited time window to retrieve, before punting to a web component or custom element enhancement (during template instantiation or in the live DOM tree (worse-case)).  
 
-However, currently the service worker is significantly constrained in its ability to seek out these include statements in the streaming HTML, because there is no support, without a [1.2MB](https://github.com/worker-tools/html-rewriter#installation) polyfill, which almost defeats the purpose (high performance).
+However, currently, the service worker is significantly constrained in its ability to seek out these include statements in the streaming HTML, because there is no support, without a [1.2MB](https://github.com/worker-tools/html-rewriter#installation) polyfill, which almost defeats the purpose (high performance).
 
-Or, if using service workers seems like overkill, a web component or custom enhancement, such as [be-written](https://github.com/bahrus/be-written) could handle includes embedded in the streaming HTML.  But such solutions have enough complexity on its hands already it needs to deal with. Having to build its own parser to parse the HTML as it streams in, searching for such includes to inject cached HTML into would again likely measure up in the hundreds of kilobytes or more, based on the libraries cited above, especially if it strives to do the job right.  Waiting for the full HTML to stream, before parsing using built-in api's, wouldn't be particularly efficient either.
+Or, if using service workers seems like overkill, a web component or custom enhancement, such as [be-written](https://github.com/bahrus/be-written) could handle includes embedded in the streaming HTML.  But such solutions have enough complexity on its hands already it needs to deal with. Having to build its own parser to parse the HTML as it streams in, searching for such includes to inject cached HTML into would again likely measure up in the hundreds of kilobytes or more, based on the libraries cited above, especially if it strives to do the job right.  Waiting for the full HTML to stream, before parsing using built-in api's, wouldn't be particularly efficient either.  
 
 ## Demonstrating a commitment to progress (iframes 2.0, continued)
 
-If the WHATWG is at all interested in improving the end user experience, especially for those dealing with expensive networks (which I suspect they are, at least in theory), then I think they should be bold and show some leadership, and help us buck the industries' addiction to restful API mechanism as the only way (outside iframes) for sharing content.
+If the WHATWG is at all interested in improving the end user experience, especially for those dealing with expensive networks (which I suspect they are, at least in theory), then I think they should be bold and show some leadership, and help us buck the industries' addiction to restful JSON-only API mechanism as the only way (outside iframes) for sharing content.
 
 To quote [this article](https://jakearchibald.com/2021/cors/):
 
@@ -52,7 +69,9 @@ To quote [this article](https://jakearchibald.com/2021/cors/):
 
 But one issue with embedding an HTML stream from a third party, is needing to adjust hyperlinks, image links, etc so it points to the right place.  This is [probably the most mundane, slam-dunk reason for supporting this proposal](https://developers.cloudflare.com/workers/examples/rewrite-links/).  Again, this is not only an issue in a service worker, but also for the [be-written](https://github.com/bahrus/be-written) custom enhancement, which tries its best, using mutation observers, to adjust links as the HTML streams in and gets written to the DOM.  This solution would be critical for using this library in a production setting outside tightly controlled scenarios.
 
-## A primitive that would make developing an HTML Parser somewhat trivial
+Other things lack of a SAX Parser makes difficult -- filtering out 
+
+## A primitive that would make developing an HTML/XML Parser somewhat trivial
 
 If this primitive (Cloudflare/Bun.s's HTML Rewriter) was built into the browser, creating a full-blown DOM parser would be quite straightforward, which has been a common (but often thwarted) use case.  As the [bun.js](https://bun.sh/docs/api/html-rewriter#:~:text=Bun%20provides%20a%20fast%20native%20implementation%20of%20the,console.log%28el.tagName%29%3B%20%2F%2F%20%22body%22%20%7C%20%22div%22%20%7C...%20%7D%2C%20%7D%29%3B) documentation demonstrates:
 
@@ -80,9 +99,9 @@ rewriter.transform(
 `));
 ```
 
-I don't mean to underestimate that effort -- creating a simple object structure, like JSON parsing provides, seems almost trivial.  But supporting DOM or XPATH querying does seem like significantly more work, and likewise, increasing the payload size.
+I don't mean to underestimate that effort -- creating a simple object structure, like JSON parsing provides, seems almost trivial.  But supporting CSS or XPATH querying does seem like significantly more work, and likewise, increasing the payload size.
 
-Now what kinds of use cases, running in a worker thread, would be better served by a full, traversable DOM tree, versus use cases that could be done with the more streamlined, low memory SAX-like implementation that Cloudflare's/Bun's HTML Rewriter provides, that can process real time as the HTML/XML streams through the pipeline?  I'm not yet sure, but I do suspect, beyond sheer simplicity, that there are such use cases.  I will be collecting a list of use cases where HTML/XML parsing in a worker and/or stream would appear to be a valid use case, and, without doing a deep dive, *guessing* which model would serve better below in some cases.  This list is likely to grow (we are after, all, primarily focused on presenting HTML to the user, so I wouldn't be surprised if the list grows quite large).
+Now what kinds of use cases, running in a worker thread, would be better served by a full, bi-directional traversing of the DOM tree, versus use cases that could be done with the more streamlined, low memory SAX-like implementation that Cloudflare's/Bun's HTML Rewriter provides, that can process real time as the HTML/XML streams through the pipeline?  I'm not yet sure, but I do suspect, beyond sheer simplicity, that there are such use cases.  I will be collecting a list of use cases where HTML/XML parsing in a worker and/or stream would appear to be a valid use case, and, without doing a deep dive, *guessing* which model would serve better below in some cases.  This list is likely to grow (we are after, all, primarily focused on presenting HTML to the user, so I wouldn't be surprised if the list grows quite large).
 
 But the idea here is it shouldn't be an either/or.  Having a SAX Parser like Cloudflare/Bun.js provides, seems like a must.  The DOM traversal argument on top of that seems like icing on the cake, that I hope the platform would eventually support, but which I think could, in the meantime, be built in userland with a relatively tiny footprint.
 
@@ -96,7 +115,7 @@ But the idea here is it shouldn't be an either/or.  Having a SAX Parser like Clo
 
 [XML](https://en.wikipedia.org/wiki/XML_Signature) [still](https://www.xml.com/) [has](https://www.balisage.net/Proceedings/vol21/html/Thompson01/BalisageVol21-Thompson01.html) [many](https://developer.mozilla.org/en-US/docs/Web/SVG) [uses](https://developer.mozilla.org/en-US/docs/Web/SVG), [and](https://en.wikipedia.org/wiki/MathML) [is](https://en.wikipedia.org/wiki/Office_Open_XML) [still] [a](https://en.wikipedia.org/wiki/XMPP) [standard](https://www.w3.org/XML/).
 
-[Not](https://en.wikipedia.org/wiki/Health_Level_7) [supporting](http://www.opentraveldevelopersnetwork.com/implementation-guide) [this](https://www.fpml.org/spec/fpml-5-11-7-rec-1/html/confirmation/fpml-5-11-examples-frame.html) [entire](https://www.mismo.org/standards-resources/mismo-engineering-guidelines) [data](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HomeHealthQualityInits/DataSpecifications) format in such a broad space of development, while supporting JSON, while understandable, still smacks of technical bigotry, frankly.  It is unfairly tipping the scales in the IT industry.  And it is  quite an insult to the origins of the web.
+[Not](https://en.wikipedia.org/wiki/Health_Level_7) [supporting](http://www.opentraveldevelopersnetwork.com/implementation-guide) [this](https://www.fpml.org/spec/fpml-5-11-7-rec-1/html/confirmation/fpml-5-11-examples-frame.html) [entire](https://www.mismo.org/standards-resources/mismo-engineering-guidelines) [data](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HomeHealthQualityInits/DataSpecifications) format in such a broad space of development, while supporting JSON, while understandable, still strikes me as fundamentally unfair, frankly.  It is tipping the scales in the IT industry, not allowing the two data formats to compete on their own terms.  And it is quite an insult to the origins of the web.
 
 ### Already cited use cases by people encountering this missing primitive
 
