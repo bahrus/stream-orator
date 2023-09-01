@@ -24,7 +24,7 @@ Nice use case presented [here](https://github.com/whatwg/dom/issues/1217).
 
 Mentioned [here](https://github.com/w3c/ServiceWorker/issues/846#issuecomment-273643690). 
 
-These use cases are just the tip of the iceberg.  How long before we here from folks using any of:
+These use cases are just the tip of the iceberg.  How long before we hear from folks using any of:
 
 ### SOAP/XML Services
 
@@ -32,9 +32,9 @@ These use cases are just the tip of the iceberg.  How long before we here from f
 
 ### XML Vocabularies
 
-[XML](https://en.wikipedia.org/wiki/XML_Signature) [still](https://www.xml.com/) [has](https://www.balisage.net/Proceedings/vol21/html/Thompson01/BalisageVol21-Thompson01.html) [many](https://developer.mozilla.org/en-US/docs/Web/SVG) [uses](https://developer.mozilla.org/en-US/docs/Web/SVG), [and](https://en.wikipedia.org/wiki/MathML) [is](https://en.wikipedia.org/wiki/Office_Open_XML) [still] [a](https://en.wikipedia.org/wiki/XMPP) [standard](https://www.w3.org/XML/).
+[XML](https://en.wikipedia.org/wiki/XML_Signature) [still](https://www.xml.com/) [has](https://www.balisage.net/Proceedings/vol21/html/Thompson01/BalisageVol21-Thompson01.html) [many](https://developer.mozilla.org/en-US/docs/Web/SVG) [uses](https://developer.mozilla.org/en-US/docs/Web/SVG), [and](https://en.wikipedia.org/wiki/MathML) [is](https://en.wikipedia.org/wiki/Office_Open_XML) [still](https://www.fixtrading.org/standards/fixatdl-online/#:~:text=A%20set%20of%20XML%20Schema%20files%20has%20been,source%20code%20which%20maps%20classes%20to%20XML%20representations.) [a](https://en.wikipedia.org/wiki/XMPP) [standard](https://www.w3.org/XML/).
 
-[Not](https://en.wikipedia.org/wiki/Health_Level_7) [supporting](http://www.opentraveldevelopersnetwork.com/implementation-guide) [this](https://www.fpml.org/spec/fpml-5-11-7-rec-1/html/confirmation/fpml-5-11-examples-frame.html) [entire](https://www.mismo.org/standards-resources/mismo-engineering-guidelines) [data](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HomeHealthQualityInits/DataSpecifications) format in such a broad space of development, while supporting JSON, while understandable, still strikes me as fundamentally unfair, frankly.  It is tipping the scales in the IT industry,  leaving whole organizations out in the cold, not allowing the two data formats to compete on their own terms.  And it is quite an insult to the origins of the web.
+[Not](https://en.wikipedia.org/wiki/Health_Level_7) [supporting](http://www.opentraveldevelopersnetwork.com/implementation-guide) [this](https://www.fpml.org/spec/fpml-5-11-7-rec-1/html/confirmation/fpml-5-11-examples-frame.html) [entire](https://www.mismo.org/standards-resources/mismo-engineering-guidelines) [data](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HomeHealthQualityInits/DataSpecifications) [format](https://sourceforge.net/p/epidoc/wiki/Schema/) [in](https://en.wikipedia.org/wiki/MusicXML) such a broad space of development, while supporting JSON, while understandable, still strikes me as fundamentally unfair, frankly.  It is tipping the scales in the IT industry,  leaving whole organizations out in the cold, not allowing the two data formats to compete on an even playing field.  And it is quite an insult to the origins of the web.
 
 To this vast list of shortchanged parties, let me add my own petty grievances and desires, discussed below.
 
@@ -97,7 +97,9 @@ To quote [this article](https://jakearchibald.com/2021/cors/):
 
 But one issue with embedding an HTML stream from a third party, is needing to adjust hyperlinks, image links, etc so it points to the right place.  This is [probably the most mundane, slam-dunk reason for supporting this proposal](https://developers.cloudflare.com/workers/examples/rewrite-links/).  Again, this is not only an issue in a service worker, but also for the [be-written](https://github.com/bahrus/be-written) custom enhancement, which tries its best, using mutation observers, to adjust links as the HTML streams in and gets written to the DOM.  This solution would be critical for using this library in a production setting outside tightly controlled scenarios.
 
-Other things lack of a SAX Parser makes difficult -- filtering out parts of the HTML stream, like jQuery supports, script tags, style tags, etc.
+[i18n support](https://developers.cloudflare.com/workers/tutorials/localize-a-website/) also seems like a good use case.
+
+Other things for which the lack of a SAX Parser makes life difficult -- filtering out parts of the HTML stream, like jQuery supports -- filtering out script tags, style tags, etc.
 
 ## A primitive that would make developing an HTML/XML Parser somewhat trivial
 
