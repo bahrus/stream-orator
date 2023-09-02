@@ -34,7 +34,7 @@ These use cases are just the tip of the iceberg.  How long before we hear from f
 
 [XML](https://en.wikipedia.org/wiki/XML_Signature) [still](https://www.xml.com/) [has](https://www.balisage.net/Proceedings/vol21/html/Thompson01/BalisageVol21-Thompson01.html) [many](https://developer.mozilla.org/en-US/docs/Web/SVG) [uses](https://developer.mozilla.org/en-US/docs/Web/SVG), [and](https://en.wikipedia.org/wiki/MathML) [is](https://en.wikipedia.org/wiki/Office_Open_XML) [still](https://www.fixtrading.org/standards/fixatdl-online/#:~:text=A%20set%20of%20XML%20Schema%20files%20has%20been,source%20code%20which%20maps%20classes%20to%20XML%20representations.) [a](https://en.wikipedia.org/wiki/XMPP) [standard](https://www.w3.org/XML/).
 
-[Not](https://en.wikipedia.org/wiki/Health_Level_7) [supporting](http://www.opentraveldevelopersnetwork.com/implementation-guide) [this](https://www.fpml.org/spec/fpml-5-11-7-rec-1/html/confirmation/fpml-5-11-examples-frame.html) [entire](https://www.mismo.org/standards-resources/mismo-engineering-guidelines) [data](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HomeHealthQualityInits/DataSpecifications) [format](https://sourceforge.net/p/epidoc/wiki/Schema/) [in](https://en.wikipedia.org/wiki/MusicXML) such a broad space of development, while supporting JSON, while understandable, still strikes me as fundamentally unfair, frankly.  It is tipping the scales in the IT industry,  leaving whole organizations out in the cold, not allowing the two data formats to compete on an even playing field.  And it is quite an insult to the origins of the web.
+[Not](https://en.wikipedia.org/wiki/Health_Level_7) [supporting](http://www.opentraveldevelopersnetwork.com/implementation-guide) [this](https://www.fpml.org/spec/fpml-5-11-7-rec-1/html/confirmation/fpml-5-11-examples-frame.html) [entire](https://www.mismo.org/standards-resources/mismo-engineering-guidelines) [data](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HomeHealthQualityInits/DataSpecifications) [format](https://sourceforge.net/p/epidoc/wiki/Schema/) [in](https://en.wikipedia.org/wiki/MusicXML) such a broad space of development, while supporting JSON,  still strikes me as fundamentally unfair, frankly.  I think there are understandable reasons for how we ended up here at this point (baby steps and all that), but it really is not right, long term. I think it is tipping the scales in the IT industry,  leaving whole organizations out in the cold, not allowing the two data formats to compete on an even playing field.  And it is quite an insult to the origins of the web.
 
 To this vast list of shortchanged parties, let me add my own petty grievances and desires, discussed below.
 
@@ -48,7 +48,7 @@ Providing this feature would, I believe, address a significant number of use cas
 
 ## Highlights of the proposal
 
-1.  Add native support for a SAX-like API built into the platform, accessible from workers and the main thread, capable of working with HTML5, with all its quirks.  I think the Cloudflare/Bun.js's HTMLRewriter API is a good, proven, concrete starting point as far as the basic shape of the API, and in how it integrates with (Service) Worker streaming.  I have no suggestions on how to improve upon that basic API, so as far as I'm concerned, it is also a good ending point (maybe change the name to indicate a broader scope.)
+1.  Add native support for a SAX-like API built into the platform, accessible from workers and the main thread, capable of working with HTML5, with all its quirks.  I think the Cloudflare/Bun.js's HTMLRewriter API is a good, proven, concrete starting point as far as the basic shape of the API, and in how it integrates with streaming API's.  I have no suggestions on how to improve upon that basic API, so as far as I'm concerned, it is also a good ending point (maybe change the name to indicate a broader scope? )
 2.  Crucially, it must provide support for parsing to a rudimentary object model,  similar to parsed JSON, which is certainly the case with the HTML rewriter.
 3.  Add (a subset of?) XPath support (which the HTMLRewriter API doesn't currently support).
 4.  Using the same basic API shape, support XML with XPath based "events".
@@ -59,6 +59,8 @@ This is listed in priority order as I see it, and rolling out in stages seems pe
 ## Highlights of open questions (in my mind)
 
 1.  Cloudflare's HTML Rewriter restricts queries to a small subset of the full CSS Selector specification (and modifies the syntax in some cases).  There may be some very practical reasons for this (and I think we can live with it).  But if it is just a matter of not devoting time to support low usage case scenarios, I don't know that we want to create a permanent "ceiling" in the css queries allowed.
+2.  What is the best name for this api?   
+
 
 
 ## My personal use cases:
@@ -95,11 +97,11 @@ To quote [this article](https://jakearchibald.com/2021/cors/):
 
 >If a resource never contains private data, then it's totally safe to put Access-Control-Allow-Origin: * on it. Do it! Do it now!
 
-But one issue with embedding an HTML stream from a third party, is needing to adjust hyperlinks, image links, etc so it points to the right place.  This is [probably the most mundane, slam-dunk reason for supporting this proposal](https://developers.cloudflare.com/workers/examples/rewrite-links/).  Again, this is not only an issue in a service worker, but also for the [be-written](https://github.com/bahrus/be-written) custom enhancement, which tries its best, using mutation observers, to adjust links as the HTML streams in and gets written to the DOM.  This solution would be critical for using this library in a production setting outside tightly controlled scenarios.
+But one issue with embedding an HTML stream from a third party, is needing to adjust hyperlinks, image links, etc so it points to the right place.  This is [probably the most mundane, slam-dunk reason for supporting this proposal](https://developers.cloudflare.com/workers/examples/rewrite-links/).  Again, this is not only an issue in a service worker, but also in the main thread.  The [be-written](https://github.com/bahrus/be-written) custom enhancement, which tries its best deal with this, has to use mutation observers, to adjust links as the HTML streams in and gets written to the DOM.  This solution would be critical for using this library in a production setting outside tightly controlled scenarios.  It often results in 404's getting logged because the link was adjusted fast enough.
 
 [i18n support](https://developers.cloudflare.com/workers/tutorials/localize-a-website/) also seems like a good use case.
 
-Other things for which the lack of a SAX Parser makes life difficult -- filtering out parts of the HTML stream, like jQuery supports -- filtering out script tags, style tags, etc.
+Other things for which the lack of a Stream  makes life difficult -- filtering out parts of the HTML stream, like jQuery supports -- filtering out script tags, style tags, etc.
 
 ## A primitive that would make developing an HTML/XML Parser somewhat trivial
 
@@ -129,6 +131,8 @@ rewriter.transform(
 `));
 ```
 
+
+
 I don't mean to underestimate that effort -- creating a simple object structure, like JSON parsing provides, seems almost trivial.  But supporting CSS or XPATH querying does seem like significantly more work, and likewise, increasing the payload size.
 
 Now what kinds of use cases, running in a worker thread, would be better served by a full, bi-directional traversing of the DOM tree, versus use cases that could be done with the more streamlined, low memory SAX-like implementation that Cloudflare's/Bun's HTML Rewriter provides, that can process real time as the HTML/XML streams through the pipeline?  I'm not yet sure, but I do suspect, beyond sheer simplicity, that there are such use cases.  
@@ -154,7 +158,54 @@ I'm not advocating that this proposal go anywhere near supporting updating the D
 
 I do think the argument does apply to some degree with HTML that streams through the service worker on its way to the browser's main thread.  In that setting, there may be cached, persisted data from previous visits in IndexedDB, and in some of those scenarios, the code that would need to manipulate that data could be complex enough that doing it prior to leaving the service worker would make a tremendous amount of sense, from a performance point of view.  I am alluding to [thought-provoking arguments like this one](https://dassur.ma/things/react-redux-comlink/). I do think that the platform's inability to merge such computations with the HTML streaming in, due to lack of SAX parsing support, is a barrier to that vision. 
 
-(More to come).
+## Quibbles about naming
+
+I think my only problem with it is it implies we can only rewrite HTML.  But there are other things we can do, like parse to an object (leaving the response untouched), and/or console log, etc.  And then there's the question of how to work in XML.  Separate 
+
+I will note that Bun.js's example code looks simpler than Cloudflare's.   I've not played around with Bun.js, only with  Cloudflare's HTMLRewriter, which uses a class to handle match events, and I've not tried to see if using the non-class code that Bun.js documents would also work with Cloudflare. But I will use Cloudflare's documented examples as the basis for musing how to make it clearer what we are doing.
+
+If we just want to read from the response, instead of:
+
+```JavaScript
+class UserElementHandler {
+  async element(element) {
+    let response = await fetch(new Request('/user'));
+
+    // fill in user info using response
+  }
+}
+
+async function handleRequest(req) {
+  const res = await fetch(req);
+
+  // run the user element handler via HTMLRewriter on a div with ID `user_info`
+  return new HTMLRewriter().on('div#user_info', new UserElementHandler()).transform(res);
+}
+```
+
+we could have:
+
+```JavaScript
+class ElementHandler {
+  constructor(){
+    this.parsedObject = {};
+  }
+  async element(element) {
+    
+  }
+}
+
+async function handleRequest(req) {
+  const res = await fetch(req);
+
+  // run the user element handler via HTMLRewriter on a div with ID `user_info`
+  return new HTMLReader().on('*', new ElementHandler()).subscribe(res);
+}
+```
+
+And the handler class would, in this case, only have the "read" methods, i.e. it would be a stripped down version of the full class.  
+
+
 
 
 
