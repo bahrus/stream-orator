@@ -49,12 +49,12 @@ Providing this feature would, I believe, address a significant number of use cas
 ## Highlights of the proposal
 
 1.  Add native support for a SAX-like API built into the platform, accessible from workers and the main thread, capable of working with HTML5, with all its quirks.  I think the Cloudflare/Bun.js's HTMLRewriter API is a good, proven, concrete starting point as far as the basic shape of the API, and in how it integrates with streaming API's.  I have no suggestions on how to improve upon that basic API, so as far as I'm concerned, it is also a good ending point, at least for rewriting operations.
-2.  Crucially, it must provide support for parsing to a rudimentary object model,  similar to parsed JSON, which is certainly the case with the HTML rewriter.  However, I think it would be clearest if another class, called HTMLReader was defined, which instead of having a "transform" method, would have a "subscribe" method, and the handler class would only have access to the properties and methods that read from the stream.  Code would still be required to generate whatever object the developer needs.
-3.  Add (a subset of?) XPath support (which the HTMLRewriter API doesn't currently support).
-4.  Using the same basic API shape, support XML with XPath based "events".  (XMLRewriter and XMLReader)
+2.  Add (a subset of?) XPath support (which the HTMLRewriter API doesn't currently support).
+3.  Crucially, it must provide support for parsing to a rudimentary object model,  similar to parsed JSON.  That is already the case with the HTML rewriter, with a judicious paragraph of code.  However, I think it would be clearest if another (base?) class, called HTMLReader was defined, which instead of having a "transform" method, would have a "subscribe" method, and the (base?) handler class would only have access to the properties and methods that read from the stream.  Code would still be required to generate whatever object the developer needs out of it.  Maybe a generic reference example/utility (equivalent of JSON.parse) could be baked into the platform as part of this step.
+4.  Using the same basic API shape, support XML with XPath based "events".  (XMLRewriter and XMLReader).
 5.  Add special support for configurable interpolation and processing markers, that would allow for templating engines to build on top of (e.g. XSLT, Template Instantiation on the server side, etc.)  As that is the least proven suggestion, I'm still mulling over what that would look like.
 
-This is listed in priority order as I see it, and rolling out in stages seems perfectly appropriate.
+I have too much skin in the game to properly weigh how to prioritize these items, but however they are prioritized, rolling out in stages seems perfectly appropriate (including the supported CSS/XPath matches).
 
 ## Highlights of open questions (in my mind)
 
@@ -87,7 +87,7 @@ However, currently, the service worker is significantly constrained in its abili
 
 Or, if using service workers seems like overkill, a web component or custom enhancement, such as [be-written](https://github.com/bahrus/be-written) could handle includes embedded in the streaming HTML.  But such solutions have enough complexity on its hands already it needs to deal with. Having to build its own parser to parse the HTML as it streams in, searching for such includes to inject cached HTML into would again likely measure up in the hundreds of kilobytes or more, based on the libraries cited above, especially if it strives to do the job right.  Waiting for the full HTML to stream, before parsing using built-in api's, wouldn't be particularly efficient either.  
 
-## Demonstrating a commitment to progress (iframes 2.0, continued)
+## Iframes 2.0 in userland
 
 If the WHATWG is at all interested in improving the end user experience, especially for those dealing with expensive networks (which I suspect they are, at least in theory), then I think they should be bold and show some leadership, and help us buck the industries' addiction to restful JSON-only API mechanism as the only way (outside iframes) for sharing content.
 
@@ -95,11 +95,11 @@ To quote [this article](https://jakearchibald.com/2021/cors/):
 
 >If a resource never contains private data, then it's totally safe to put Access-Control-Allow-Origin: * on it. Do it! Do it now!
 
-But one issue with embedding an HTML stream from a third party, is needing to adjust hyperlinks, image links, etc so it points to the right place.  This is [probably the most mundane, slam-dunk reason for supporting this proposal](https://developers.cloudflare.com/workers/examples/rewrite-links/).  Again, this is not only an issue in a service worker, but also in the main thread.  The [be-written](https://github.com/bahrus/be-written) custom enhancement, which tries its best deal with this, has to use mutation observers, to adjust links as the HTML streams in and gets written to the DOM.  This solution would be critical for using this library in a production setting outside tightly controlled scenarios.  It often results in 404's getting logged because the link was adjusted fast enough.
+But one issue with embedding an HTML stream from a third party, is needing to adjust hyperlinks, image links, etc so it points to the right place.  This is [probably the most mundane, slam-dunk reason for supporting this proposal](https://developers.cloudflare.com/workers/examples/rewrite-links/).  Again, this is not only an issue in a service worker, but also in the main thread.  The [be-written](https://github.com/bahrus/be-written) custom enhancement, which tries its best to deal with this, has to use mutation observers, to adjust links as the HTML streams in and gets written to the DOM.  This solution would be critical for using this library in a production setting outside tightly controlled scenarios.  As it is, it often results in 404's getting logged because the urls aren't adjusted fast enough.
 
 [i18n support](https://developers.cloudflare.com/workers/tutorials/localize-a-website/) also seems like a good use case.
 
-Other things for which the lack of a Stream  makes life difficult -- filtering out parts of the HTML stream, like jQuery supports -- filtering out script tags, style tags, etc.
+Other things for which the lack of a stream parser makes life difficult -- filtering out parts of the HTML stream, like jQuery supports -- filtering out script tags, style tags, etc.
 
 ## A primitive that would make developing an HTML/XML Parser somewhat trivial
 
@@ -133,10 +133,9 @@ reader.subscribe(
 
 In this case, the handler class would only have readonly access to the content.
 
+I don't mean to underestimate that effort -- creating a simple object structure, like JSON parsing provides, seems almost trivial.  But creating a full blown object with bi-directional traversal, supporting CSS or XPATH querying, and the full gamut of DOM manipulation methods, does seem like significantly more work, and likewise, increasing the payload size.
 
-I don't mean to underestimate that effort -- creating a simple object structure, like JSON parsing provides, seems almost trivial.  But creating a full blown object with bi-directional traversal, supporting CSS or XPATH querying, and the full gamut of DOM manipulation methods does seem like significantly more work, and likewise, increasing the payload size.
-
-Now what kinds of use cases, running in a service worker, would be better served by a full, bi-directional traversing of the DOM tree, versus use cases that could be done with the more streamlined, low memory SAX-like implementation that Cloudflare's/Bun's HTML Rewriter provides, that can process real time as the HTML/XML streams through the pipeline?  I'm not yet sure, but I do suspect, beyond sheer simplicity, that there are such use cases.  
+Now what kinds of use cases, running in a service worker, would be better served by a full, bi-directional traversing of the DOM tree, versus use cases that could be done with the more streamlined, low memory SAX-like implementation that can process real time as the HTML/XML streams through the pipeline?  I'm not yet sure, but I do suspect, beyond sheer simplicity, that there are such use cases.  
 
 But the idea here is it shouldn't be an either/or.  Having a SAX Parser like Cloudflare/Bun.js provides, seems like a must.  The DOM traversal argument on top of that seems like icing on the cake, that I hope the platform would eventually support, but which I think could, in the meantime, be built in userland with a relatively tiny footprint.
 
@@ -146,7 +145,9 @@ Streaming a must, no need for full traversal.
 
 ### Building a table of contents dynamically as content streams in
 
-Suppose we request, within a large app, an embedded huge document, and the document starts with a table of contents within a menu.  If the table of contents shows (or enables) everything at once, users may get frustrated when the links don't work, not realizing that the issue is that the section the link points to hasn't arrived in the browser, and stop using it.  This could be accomplished with a mutation observer, but a more elegant and direct approach, I think, would be using a SAX parser such as Cloudflare's/Bun's HTMLRewriter.  I think it would perform better as well.  This would not be best solved by a service worker, but rather by two web components or custom enhancements working together in the main thread with streaming HTML.
+Suppose we request, within a large app, an embedded huge document, and the document starts with a table of contents within a menu.  If the table of contents shows (or enables) everything at once, users may get frustrated when the links don't work, not realizing that the issue is that the section the link points to hasn't arrived in the browser.  One or two such clicks, and the user may abandon use of the table of contents altogether.  
+
+So we need a way for the table of contents to grow in accordance to the sections of html being downloaded.  This could be accomplished with a mutation observer, but a more elegant and direct approach, I think, would be using a SAX parser such as Cloudflare's/Bun's HTMLRewriter.  I think it would perform better as well.  This would not be best solved by a service worker, but rather by two web components or custom enhancements working together in the main thread with streaming HTML.
 
 ### Deriving state from HTML as it streams in.
 
@@ -155,9 +156,17 @@ Similar to the table of contents example.  Again, mutation observers are probabl
 
 ### Pushing work off the main thread.
 
-I'm not advocating that this proposal go anywhere near supporting updating the DOM from a worker (not opposing it either, that just seems like [an entirely different proposal](https://github.com/whatwg/dom/issues/270), though I suspect such proposals would benefit from being able to parse streaming HTML in the worker, with the help of the platform, but that request isn't made with this particular proposal).
+I'm not advocating that this proposal go anywhere near supporting updating the DOM from a worker.  For the record, I'm not opposing it either.  It just seems like [an entirely different proposal](https://github.com/whatwg/dom/issues/270). But I do suspect such proposals would benefit from being able to parse streaming HTML in the worker, with the help of the platform, but that request isn't made with this particular proposal.
 
-I do think the argument does apply to some degree with HTML that streams through the service worker on its way to the browser's main thread.  In that setting, there may be cached, persisted data from previous visits in IndexedDB, and in some of those scenarios, the code that would need to manipulate that data could be complex enough that doing it prior to leaving the service worker would make a tremendous amount of sense, from a performance point of view.  I am alluding to [thought-provoking arguments like this one](https://dassur.ma/things/react-redux-comlink/). I do think that the platform's inability to merge such computations with the HTML streaming in, due to lack of SAX parsing support, is a barrier to that vision. 
+I do think the argument does apply to some degree with HTML that streams through the service worker on its way to the browser's main thread.  In that setting, there may be cached, persisted data from previous visits in IndexedDB, and in some of those scenarios, the code that would need to manipulate that data could be complex enough that doing it prior to leaving the service worker would make a tremendous amount of sense, from a performance point of view.  I am alluding to [thought-provoking arguments like this one](https://dassur.ma/things/react-redux-comlink/). I do think that the platform's inability to merge such computations with the HTML streaming in, due to lack of SAX parsing support, is a barrier to that vision.
+
+### Hydrating streaming HTML - my most central interest in this proposal.
+
+As [many have argued](https://make.wordpress.org/core/2023/03/30/proposal-the-interactivity-api-a-better-developer-experience-in-building-interactive-blocks/), there are great synergies that can be achieved between [custom enhancement attributes](https://github.com/WICG/webcomponents/issues/1000) between the main thread and the server.  For many of my enhancements, I first check if the server has created a button I need (with a certain class, say), and then I need to document "for a better user experience, please make the server add such and such button with such and such class".  If the enhancement finds no such button, it creates it in the main thread, knowing that that isn't the optimal experience.
+
+I would like to instead provide a "server-side" library I can point the user to that could execute in the two "back-end legs" isomorphically -- the CloudFare or Bun.js (or Deno.js) service, and the service worker.  This would follow the same "Edge of tomorrow" approach -- if the remote server has already downloaded the library, great, it will add that button.  If not, it can punt: "Sorry, I don't want to render block, maybe the service worker has it in cache, and I'll pick it up next time".  Same logic in the service worker.  
+
+Knowing that I could use the same API both in a server setting, and in the browser, would tell me that the approach I'm using will have enough longevity that it is worth my time to do it.  It means developers using a server technology that isn't JavaScript based could at least rely on the service-worker half of the equation.  Otherwise, I'd rather target a server technology with more reach (I may anyway, just saying.)
 
 
 
