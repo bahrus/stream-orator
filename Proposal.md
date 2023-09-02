@@ -59,7 +59,7 @@ This is listed in priority order as I see it, and rolling out in stages seems pe
 ## Highlights of open questions (in my mind)
 
 1.  Cloudflare's HTML Rewriter restricts queries to a small subset of the full CSS Selector specification (and modifies the syntax in some cases).  There may be some very practical reasons for this (and I think we can live with it).  But if it is just a matter of not devoting time to support low usage case scenarios, I don't know that we want to create a permanent "ceiling" in the css queries allowed.
-2.  What is the best name for this api?   
+   
 
 
 
