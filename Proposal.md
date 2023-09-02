@@ -34,7 +34,7 @@ These use cases are just the tip of the iceberg.  How long before we hear from f
 
 [XML](https://en.wikipedia.org/wiki/XML_Signature) [still](https://www.xml.com/) [has](https://www.balisage.net/Proceedings/vol21/html/Thompson01/BalisageVol21-Thompson01.html) [many](https://developer.mozilla.org/en-US/docs/Web/SVG) [uses](https://developer.mozilla.org/en-US/docs/Web/SVG), [and](https://en.wikipedia.org/wiki/MathML) [is](https://en.wikipedia.org/wiki/Office_Open_XML) [still](https://www.fixtrading.org/standards/fixatdl-online/#:~:text=A%20set%20of%20XML%20Schema%20files%20has%20been,source%20code%20which%20maps%20classes%20to%20XML%20representations.) [a](https://en.wikipedia.org/wiki/XMPP) [standard](https://www.w3.org/XML/).
 
-[Not](https://en.wikipedia.org/wiki/Health_Level_7) [supporting](http://www.opentraveldevelopersnetwork.com/implementation-guide) [this](https://www.fpml.org/spec/fpml-5-11-7-rec-1/html/confirmation/fpml-5-11-examples-frame.html) [entire](https://www.mismo.org/standards-resources/mismo-engineering-guidelines) [data](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HomeHealthQualityInits/DataSpecifications) [format](https://sourceforge.net/p/epidoc/wiki/Schema/) [in](https://en.wikipedia.org/wiki/MusicXML) such a broad space of development, while supporting JSON,  still strikes me as fundamentally unfair, frankly.  I think there are understandable reasons for how we ended up here at this point (baby steps and all that), but it really is not right, long term. I think it is tipping the scales in the IT industry,  leaving whole organizations out in the cold, not allowing the two data formats to compete on an even playing field.  And it is quite an insult to the origins of the web.
+[Not](https://en.wikipedia.org/wiki/Health_Level_7) [supporting](http://www.opentraveldevelopersnetwork.com/implementation-guide) [this](https://www.fpml.org/spec/fpml-5-11-7-rec-1/html/confirmation/fpml-5-11-examples-frame.html) [entire](https://www.mismo.org/standards-resources/mismo-engineering-guidelines) [data](https://www.cms.gov/Medicare/Quality-Initiatives-Patient-Assessment-Instruments/HomeHealthQualityInits/DataSpecifications) [format](https://sourceforge.net/p/epidoc/wiki/Schema/) [in](https://en.wikipedia.org/wiki/MusicXML) such a broad space of development, while supporting JSON,  still strikes me as fundamentally unfair, frankly.  I think there are understandable reasons for how we ended up here at this point (baby steps, not my department and all that), but it really is not right, long term. I think it is tipping the scales in the IT industry,  leaving whole organizations out in the cold, not allowing the two data formats to compete on an even playing field.  And it is quite an insult to the origins of the web.
 
 To this vast list of shortchanged parties, let me add my own petty grievances and desires, discussed below.
 
@@ -44,12 +44,12 @@ Processing HTML streams, plugging in / replacing dynamic data into "parts" with 
 
 Such an idea has taken root in [a number](https://bun.sh/docs/api/html-rewriter#:~:text=Bun%20provides%20a%20fast%20native%20implementation%20of%20the,console.log%28el.tagName%29%3B%20%2F%2F%20%22body%22%20%7C%20%22div%22%20%7C...%20%7D%2C%20%7D%29%3B) [of](https://github.com/worker-tools/html-rewriter) these solutions - the [HTML Rewriter](https://developers.cloudflare.com/workers/runtime-apis/html-rewriter).  This proposal, in essence, seeks to incorporate an enhanced version of that proven, mature solution (with additional support for moustache markers).  Honorable mentions go to [other](https://www.npmjs.com/package/@trysound/sax) [packages](https://www.npmjs.com/package/sax) which certainly get quite a few downloads, if those numbers are to be believed.
 
-Providing this feature would, I believe, address a significant number of use cases, from the mundane but important "slam-dunk" use cases, to the more revolutionary, as discussed below.
+Providing this feature would, I believe, address a significant number of use cases, from the mundane but important "slam-dunk" use cases, to the more revolutionary, as discussed below.  It would provide the equivalent of JSON.parse, at least (with the help of a small library, which maybe should be included as part of this proposal).  And it would provide a good foundation to create a robust DOM object model on top of, starting, perhaps, in userland.
 
 ## Highlights of the proposal
 
 1.  Add native support for a SAX-like API built into the platform, accessible from workers and the main thread, capable of working with HTML5, with all its quirks.  I think the Cloudflare/Bun.js's HTMLRewriter API is a good, proven, concrete starting point as far as the basic shape of the API, and in how it integrates with streaming API's.  I have no suggestions on how to improve upon that basic API, so as far as I'm concerned, it is also a good ending point, at least for rewriting operations.
-2.  Crucially, it must provide support for parsing to a rudimentary object model,  similar to parsed JSON, which is certainly the case with the HTML rewriter.  However, I think it would be clearest if another class, called HTMLReader was defined, which instead of having a "transform" method, would have a "subscribe" method, and the handler class would only have access to the properties and methods that read from the stream.
+2.  Crucially, it must provide support for parsing to a rudimentary object model,  similar to parsed JSON, which is certainly the case with the HTML rewriter.  However, I think it would be clearest if another class, called HTMLReader was defined, which instead of having a "transform" method, would have a "subscribe" method, and the handler class would only have access to the properties and methods that read from the stream.  Code would still be required to generate whatever object the developer needs.
 3.  Add (a subset of?) XPath support (which the HTMLRewriter API doesn't currently support).
 4.  Using the same basic API shape, support XML with XPath based "events".  (XMLRewriter and XMLReader)
 5.  Add special support for configurable interpolation and processing markers, that would allow for templating engines to build on top of (e.g. XSLT, Template Instantiation on the server side, etc.)  As that is the least proven suggestion, I'm still mulling over what that would look like.
@@ -60,8 +60,6 @@ This is listed in priority order as I see it, and rolling out in stages seems pe
 
 1.  Cloudflare's HTML Rewriter restricts queries to a small subset of the full CSS Selector specification (and modifies the syntax in some cases).  There may be some very practical reasons for this (and I think we can live with it).  But if it is just a matter of not devoting time to support low usage case scenarios, I don't know that we want to create a permanent "ceiling" in the css queries allowed.
    
-
-
 
 ## My personal use cases:
 
@@ -105,18 +103,18 @@ Other things for which the lack of a Stream  makes life difficult -- filtering o
 
 ## A primitive that would make developing an HTML/XML Parser somewhat trivial
 
-If this primitive (Cloudflare/Bun.s's HTML Rewriter) was built into the browser, creating a full-blown DOM parser would be quite straightforward, which has been a common (but often thwarted) use case.  As the [bun.js](https://bun.sh/docs/api/html-rewriter#:~:text=Bun%20provides%20a%20fast%20native%20implementation%20of%20the,console.log%28el.tagName%29%3B%20%2F%2F%20%22body%22%20%7C%20%22div%22%20%7C...%20%7D%2C%20%7D%29%3B) documentation demonstrates:
+If this primitive (Cloudflare/Bun.s's HTML Rewriter) was built into the browser, creating a full-blown DOM parser would be quite straightforward, which has been a common (but often thwarted) use case.  However, I suggest using clear language to indicate that these API's can be used for reading as well as writing:
 
 ```JavaScript
-const rewriter = new HTMLRewriter();
+const reader = new HTMLReader();
 
-rewriter.on("*", {
+reader.on("*", {
   element(el) {
-    console.log(el.tagName); // "body" | "div" | ...
+    console.log(el.tagName, el.text, el.attributes, el.lastInTextNode); // "body" | "div" | ...
   },
 });
 ...
-rewriter.transform(
+reader.subscribe(
   new Response(`
 <!DOCTYPE html>
 <html>
@@ -131,11 +129,14 @@ rewriter.transform(
 `));
 ```
 
+(Modified from Bun.js documentation, which hopefully is compatible with Cloudflare's API, which is documented with classes.)
+
+In this case, the handler class would only have readonly access to the content.
 
 
-I don't mean to underestimate that effort -- creating a simple object structure, like JSON parsing provides, seems almost trivial.  But supporting CSS or XPATH querying does seem like significantly more work, and likewise, increasing the payload size.
+I don't mean to underestimate that effort -- creating a simple object structure, like JSON parsing provides, seems almost trivial.  But creating a full blown object with bi-directional traversal, supporting CSS or XPATH querying, and the full gamut of DOM manipulation methods does seem like significantly more work, and likewise, increasing the payload size.
 
-Now what kinds of use cases, running in a worker thread, would be better served by a full, bi-directional traversing of the DOM tree, versus use cases that could be done with the more streamlined, low memory SAX-like implementation that Cloudflare's/Bun's HTML Rewriter provides, that can process real time as the HTML/XML streams through the pipeline?  I'm not yet sure, but I do suspect, beyond sheer simplicity, that there are such use cases.  
+Now what kinds of use cases, running in a service worker, would be better served by a full, bi-directional traversing of the DOM tree, versus use cases that could be done with the more streamlined, low memory SAX-like implementation that Cloudflare's/Bun's HTML Rewriter provides, that can process real time as the HTML/XML streams through the pipeline?  I'm not yet sure, but I do suspect, beyond sheer simplicity, that there are such use cases.  
 
 But the idea here is it shouldn't be an either/or.  Having a SAX Parser like Cloudflare/Bun.js provides, seems like a must.  The DOM traversal argument on top of that seems like icing on the cake, that I hope the platform would eventually support, but which I think could, in the meantime, be built in userland with a relatively tiny footprint.
 
