@@ -2,13 +2,13 @@
 
 Author:  Bruce B. Anderson
 
-Last Updated:  8/31/2023
+Last Updated:  9/2/2023
 
 ## Backdrop
 
 One amazing achievement the WHATWG can take pride of in the past decade has been its reach beyond the browser -- a whole ecosystem has developed that allows for "isomorphic" code to work both on the server and in the browser (as well as during the build process), driven by the painstaking standards work of the WHATWG.
 
-In particular, the tech stack that service workers tap into  -- including fetch, streaming, ES modules, caching, indexedDB, etc. can be utilized on the server-side, with solutions like CloudFlare Workers, Deno, Bun.js, and increasingly Node.  
+In particular, the tech stack that service workers tap into  -- including fetch, streaming, ES modules, caching, etc. can be utilized on the server-side, with solutions like CloudFlare Workers, Deno, Bun, and increasingly Node.  
 
 But I believe there is one significant missing piece in the standards, where the WHATWG could benefit from a bit of humility, perhaps, and absorb ideas (and maybe even code) in the opposite direction:  Fundamental support for streaming (x)(ht)ml.
 
@@ -164,9 +164,9 @@ I do think the argument does apply to some degree with HTML that streams through
 
 As [many have argued](https://make.wordpress.org/core/2023/03/30/proposal-the-interactivity-api-a-better-developer-experience-in-building-interactive-blocks/), there are great synergies that can be achieved between [custom enhancement attributes](https://github.com/WICG/webcomponents/issues/1000) between the main thread and the server.  For many of my enhancements, I first check if the server has created a button I need (with a certain class, say), and then I need to document "for a better user experience, please make the server add such and such button with such and such class".  If the enhancement finds no such button, it creates it in the main thread, knowing that that isn't the optimal experience.
 
-I would like to instead provide a "server-side" library I can point the user to that could execute in the two "back-end legs" isomorphically -- the CloudFare or Bun.js (or Deno.js) service, and the service worker.  This would follow the same "Edge of tomorrow" approach -- if the remote server has already downloaded the library, great, it will add that button.  If not, it can punt: "Sorry, I don't want to render block, maybe the service worker has it in cache, and I'll pick it up next time".  Same logic in the service worker.  
+I would like to instead provide a "server-side" library I can point the user to that could execute in the two "back-end legs" isomorphically -- the CloudFare or Bun.js (or Deno.js) service, and the service worker.  This would follow the same "Edge of Tomorrow" approach -- if the remote server has already downloaded the library, great, it will add that button.  If not, it can punt: "Sorry, I don't want to render block, maybe the service worker has it in cache, and I'll pick it up next time".  Same logic in the service worker punting to the custom enhancement.  
 
-Knowing that I could use the same API both in a server setting, and in the browser, would tell me that the approach I'm using will have enough longevity that it is worth my time to do it.  It means developers using a server technology that isn't JavaScript based could at least rely on the service-worker half of the equation.  Otherwise, I'd rather target a server technology with more reach (I may anyway, just saying.)
+Knowing that I could use the same API both in a server setting, and in the browser's service worker, would tell me that the approach I'm using will have enough longevity, that it is worth my time to do it.  It means developers using a server technology that isn't JavaScript based could at least rely on the service-worker half of the equation.  Otherwise, I'd rather target a server technology with more reach (I may anyway, just saying.)
 
 
 
