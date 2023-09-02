@@ -48,10 +48,10 @@ Providing this feature would, I believe, address a significant number of use cas
 
 ## Highlights of the proposal
 
-1.  Add native support for a SAX-like API built into the platform, accessible from workers and the main thread, capable of working with HTML5, with all its quirks.  I think the Cloudflare/Bun.js's HTMLRewriter API is a good, proven, concrete starting point as far as the basic shape of the API, and in how it integrates with streaming API's.  I have no suggestions on how to improve upon that basic API, so as far as I'm concerned, it is also a good ending point (maybe change the name to indicate a broader scope? )
-2.  Crucially, it must provide support for parsing to a rudimentary object model,  similar to parsed JSON, which is certainly the case with the HTML rewriter.
+1.  Add native support for a SAX-like API built into the platform, accessible from workers and the main thread, capable of working with HTML5, with all its quirks.  I think the Cloudflare/Bun.js's HTMLRewriter API is a good, proven, concrete starting point as far as the basic shape of the API, and in how it integrates with streaming API's.  I have no suggestions on how to improve upon that basic API, so as far as I'm concerned, it is also a good ending point, at least for rewriting operations.
+2.  Crucially, it must provide support for parsing to a rudimentary object model,  similar to parsed JSON, which is certainly the case with the HTML rewriter.  However, I think it would be clearest if another class, called HTMLReader was defined, which instead of having a "transform" method, would have a "subscribe" method, and the handler class would only have access to the properties and methods that read from the stream.
 3.  Add (a subset of?) XPath support (which the HTMLRewriter API doesn't currently support).
-4.  Using the same basic API shape, support XML with XPath based "events".
+4.  Using the same basic API shape, support XML with XPath based "events".  (XMLRewriter and XMLReader)
 5.  Add special support for configurable interpolation and processing markers, that would allow for templating engines to build on top of (e.g. XSLT, Template Instantiation on the server side, etc.)  As that is the least proven suggestion, I'm still mulling over what that would look like.
 
 This is listed in priority order as I see it, and rolling out in stages seems perfectly appropriate.
@@ -157,53 +157,6 @@ Similar to the table of contents example.  Again, mutation observers are probabl
 I'm not advocating that this proposal go anywhere near supporting updating the DOM from a worker (not opposing it either, that just seems like [an entirely different proposal](https://github.com/whatwg/dom/issues/270), though I suspect such proposals would benefit from being able to parse streaming HTML in the worker, with the help of the platform, but that request isn't made with this particular proposal).
 
 I do think the argument does apply to some degree with HTML that streams through the service worker on its way to the browser's main thread.  In that setting, there may be cached, persisted data from previous visits in IndexedDB, and in some of those scenarios, the code that would need to manipulate that data could be complex enough that doing it prior to leaving the service worker would make a tremendous amount of sense, from a performance point of view.  I am alluding to [thought-provoking arguments like this one](https://dassur.ma/things/react-redux-comlink/). I do think that the platform's inability to merge such computations with the HTML streaming in, due to lack of SAX parsing support, is a barrier to that vision. 
-
-## Quibbles about naming
-
-I think my only problem with it is it implies we can only rewrite HTML.  But there are other things we can do, like parse to an object (leaving the response untouched), and/or console log, etc.  And then there's the question of how to work in XML.  Separate 
-
-I will note that Bun.js's example code looks simpler than Cloudflare's.   I've not played around with Bun.js, only with  Cloudflare's HTMLRewriter, which uses a class to handle match events, and I've not tried to see if using the non-class code that Bun.js documents would also work with Cloudflare. But I will use Cloudflare's documented examples as the basis for musing how to make it clearer what we are doing.
-
-If we just want to read from the response, instead of:
-
-```JavaScript
-class UserElementHandler {
-  async element(element) {
-    let response = await fetch(new Request('/user'));
-
-    // fill in user info using response
-  }
-}
-
-async function handleRequest(req) {
-  const res = await fetch(req);
-
-  // run the user element handler via HTMLRewriter on a div with ID `user_info`
-  return new HTMLRewriter().on('div#user_info', new UserElementHandler()).transform(res);
-}
-```
-
-we could have:
-
-```JavaScript
-class ElementHandler {
-  constructor(){
-    this.parsedObject = {};
-  }
-  async element(element) {
-    
-  }
-}
-
-async function handleRequest(req) {
-  const res = await fetch(req);
-
-  // run the user element handler via HTMLRewriter on a div with ID `user_info`
-  return new HTMLReader().on('*', new ElementHandler()).subscribe(res);
-}
-```
-
-And the handler class would, in this case, only have the "read" methods, i.e. it would be a stripped down version of the full class.  
 
 
 
