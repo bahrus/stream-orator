@@ -15,7 +15,7 @@ Example:
         <div id=test></div>
     </details>
     <script type=module>
-        import {streamOrator} from 'node_modules/stream-orator/stream-orator.js';
+        import {streamOrator} from 'node_modules/stream-orator/StreamOrator.js';
         streamOrator('https://html.spec.whatwg.org/', {}, test);
     </script>
 ```
