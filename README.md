@@ -10,14 +10,14 @@ This package contains a utility function, streamOrator, that does a fetch and pi
 Example:
 
 ```html
-    <details>
-        <summary>HTML Specs</summary>
-        <div id=test></div>
-    </details>
-    <script type=module>
-        import {streamOrator} from 'node_modules/stream-orator/StreamOrator.js';
-        streamOrator('https://html.spec.whatwg.org/', {}, test);
-    </script>
+<details>
+    <summary>HTML Specs</summary>
+    <div id=test></div>
+</details>
+<script type=module>
+    import {streamOrator} from 'node_modules/stream-orator/StreamOrator.js';
+    streamOrator('https://html.spec.whatwg.org/', {}, test);
+</script>
 ```
 
 The second parameter is the reqInit object (fetch options).

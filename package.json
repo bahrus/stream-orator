@@ -12,8 +12,14 @@
   "main": "StreamOrator.js",
   "module": "StreamOrator.js",
   "exports": {
-    ".": "./StreamOrator.js",
-    "./StreamOrator.js": "./StreamOrator.js"
+    ".": {
+      "default": "./StreamOrator.js",
+      "types": "./StreamOrator.ts"
+    },
+    "./StreamOrator.js": {
+      "default": "./StreamOrator.js",
+      "types": "./StreamOrator.ts"
+    }
   },
   "files": [
     "*.js",
