@@ -14,7 +14,7 @@
     <div id=target></div>
     <script>
         function runTest(){
-            if(document.querySelector('a[href="members.aspx"]') !== null){
+            if(document.querySelector('a[href^="biographies.aspx"]') !== null){
                 target.setAttribute('mark', 'good');
             }
         }
