@@ -28,13 +28,13 @@
   "types": "types.d.ts",
   "scripts": {
     "test": "playwright test",
-    "serve": "node node_modules/may-it-serve/serve.js",
+    "serve": "python3 ./node_modules/ssi-server/ssi_server.py",
     "safari": "npx playwright wk http://localhost:3030",
     "update": "ncu -u && npm install"
   },
   "devDependencies": {
-    "may-it-serve": "0.0.8",
-    "@playwright/test": "1.46.1"
+    "ssi-server": "0.0.1",
+    "@playwright/test": "1.49.0"
   },
   "repository": {
     "type": "git",
