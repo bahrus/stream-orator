@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fetch HTML and Stream to Div</title>
+</head>
+<body>
+    <div id="content"></div>
+
+    <script>
+        async function fetchAndStreamHTML(url, elementId) {
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                console.error('Network response was not ok.');
+                return;
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('UTF-16');
+            const contentDiv = document.getElementById(elementId);
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                const chunk = decoder.decode(value, { stream: true, });
+                contentDiv.innerHTML += chunk;
+            }
+            console.log('done');
+        }
+
+        // Call the function with the URL of the web service and the ID of the div element
+        fetchAndStreamHTML('blah.html', 'content');
+    </script>
+</body>
+</html>
