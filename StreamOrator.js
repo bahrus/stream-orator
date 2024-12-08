@@ -186,7 +186,7 @@ export class StreamOrator extends EventTarget {
         }
         else {
             await response.body
-                .pipeThrough(new TextDecoderStream())
+                .pipeThrough(new TextDecoderStream('UTF-16'))
                 .pipeTo(target.writable);
         }
         this.dispatchEvent(new Event(endStream));
