@@ -29,7 +29,7 @@
   "scripts": {
     "test": "playwright test",
     "serve": "python3 ./node_modules/ssi-server/ssi_server.py",
-    "safari": "npx playwright wk http://localhost:3030",
+    "safari": "npx playwright wk http://localhost:8000",
     "update": "ncu -u && npm install"
   },
   "devDependencies": {

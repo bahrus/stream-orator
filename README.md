@@ -95,7 +95,7 @@ If access to the stream chunks is needed, including modifying the chunks, a litt
 4.  Open command window to folder where you cloned this repo.
 5.  > npm install
 6.  > npm run serve
-7.  Open http://localhost:3030/demo/dev in a modern browser.
+7.  Open http://localhost:8000/demo/dev in a modern browser.
 
 ## Importing in ES Modules:
 
