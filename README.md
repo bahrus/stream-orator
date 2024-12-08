@@ -34,7 +34,7 @@ The most effective utility stream-orator provides is an event to subscribe to, g
 
 [TODO] provide an example.
 
-There is an additional optional "options" parameter, where we can utilize shadowDOM:
+There is an additional optional "options" parameter, where we can utilize shadowDOM and other special settings:
 
 ```html
 <details>
@@ -43,7 +43,7 @@ There is an additional optional "options" parameter, where we can utilize shadow
 </details>
 <script type=module>
     import {streamOrator} from '../StreamOrator.js';
-    streamOrator('https://html.spec.whatwg.org/', {}, test, {shadowRoot: 'open'});
+    streamOrator('https://html.spec.whatwg.org/', {}, test, {shadowRoot: 'open', encoding: 'UTF-16'});
 </script>
 ```
 
