@@ -4,6 +4,7 @@ export interface Options {
     rootTag?: string;
     inserts?: Inserts;
     between?: [lhs: string, rhs: string];
+    encoding?: 'UTF-16' | 'UTF-8';
 }
 
 export interface NewChunkEvent {
